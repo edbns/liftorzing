@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LiftorZing</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f0f0;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 24px;
+      margin: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: background-color 0.3s;
+    }
+    .lift {
+      background-color: #6cc070;
+      color: white;
+    }
+    .lift:hover {
+      background-color: #59a95d;
+    }
+    .zing {
+      background-color: #e65e5e;
+      color: white;
+    }
+    .zing:hover {
+      background-color: #cc4d4d;
+    }
+    #quote-box {
+      margin-top: 30px;
+      padding: 20px;
+      max-width: 600px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎭 Lift or Zing 🎭</h1>
+  <div>
+    <button class="lift" onclick="getLiftOrZing('lift')">Lift Me</button>
+    <button class="zing" onclick="getLiftOrZing('zing')">Zing Me</button>
+  </div>
+  <div id="quote-box">Click a button above to get started.</div>
+
+  <script>
+    async function getLiftOrZing(mode) {
+      const quoteBox = document.getElementById("quote-box");
+      quoteBox.innerText = "Thinking... 🤔";
+      try {
+        const response = await fetch("https://huggingface.co/spaces/ambin/liftorzing-api/run/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data: [mode] })
+        });
+        const result = await response.json();
+        quoteBox.innerText = result.data[0];
+      } catch (err) {
+        quoteBox.innerText = "Oops! Something went wrong.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
