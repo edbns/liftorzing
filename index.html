@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LiftorZing</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      font-family: monospace;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .doors {
+      display: flex;
+      gap: 2rem;
+    }
+    .door {
+      background: white;
+      color: black;
+      padding: 4rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="doors">
+    <div class="door" onclick="goTo('lift')">LIFT</div>
+    <div class="door" onclick="goTo('zing')">ZING</div>
+  </div>
+  <script>
+    function goTo(type) {
+      window.location.href = 'transition.html?type=' + type;
+    }
+  </script>
+</body>
+</html>

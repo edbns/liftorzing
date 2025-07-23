@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scanning...</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: lime;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="text">[Scanning for insecurity]</div>
+  <script>
+    const url = new URL(window.location.href);
+    const type = url.searchParams.get("type");
+    setTimeout(() => {
+      window.location.href = "index.html?form=true&type=" + type;
+    }, 3000);
+  </script>
+</body>
+</html>
