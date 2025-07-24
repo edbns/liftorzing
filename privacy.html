@@ -23,42 +23,69 @@
   <meta name="twitter:description" content="One click. One fate. Get roasted 💀 or uplifted 💫 at liftorzing.com" />
   <meta name="twitter:image" content="https://liftorzing.com/social-preview.jpg" />
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: 'JetBrains Mono', monospace;
+      background-color: #000000;
+      color: #ffffff;
       line-height: 1.6;
-      margin: 2rem;
-      max-width: 800px;
-      text-align: center;
+      padding: 40px 20px;
+      min-height: 100vh;
     }
-    h1, h2 {
-      color: #000000;
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
       font-family: 'Orbitron', monospace;
+      color: #ffffff;
+      font-size: 2.5em;
+      margin-bottom: 20px;
       text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    h2 {
+      font-family: 'Orbitron', monospace;
+      color: #ffffff;
+      font-size: 1.4em;
+      margin: 30px 0 15px 0;
+      border-left: 4px solid #ffffff;
+      padding-left: 15px;
+    }
+    p {
+      margin-bottom: 15px;
+      color: #e0e0e0;
+    }
+    ul {
+      margin: 15px 0 15px 30px;
+    }
+    li {
+      margin-bottom: 8px;
+      color: #e0e0e0;
     }
     a {
-      color: #000000;
+      color: #ffffff;
       text-decoration: none;
-      border-bottom: 1px solid #000000;
+      border-bottom: 1px solid #ffffff;
       transition: opacity 0.3s ease;
     }
     a:hover {
       opacity: 0.7;
     }
-    ul {
-      padding-left: 20px;
-      text-align: left;
-      display: inline-block;
-    }
-    li {
-      margin-bottom: 8px;
-      text-align: left;
+    strong {
+      color: #ffffff;
     }
     .back-link {
-      position: absolute;
+      position: fixed;
       top: 20px;
       left: 20px;
-      background: #000000;
-      color: #ffffff;
+      background: #ffffff;
+      color: #000000;
       padding: 10px 20px;
       border: none;
       cursor: pointer;
@@ -73,36 +100,57 @@
       opacity: 0.8;
       border-bottom: none;
     }
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 15px;
+      }
+      h1 {
+        font-size: 2em;
+      }
+      h2 {
+        font-size: 1.2em;
+      }
+      .back-link {
+        position: relative;
+        top: 0;
+        left: 0;
+        margin-bottom: 20px;
+        display: block;
+        width: fit-content;
+      }
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
   <a href="index.html" class="back-link">← BACK TO DOOR</a>
-  <h1>Privacy Policy</h1>
-  <p><strong>Effective Date:</strong> July 22, 2025</p>
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <p><strong>Effective Date:</strong> July 22, 2025</p>
 
-  <p>At <strong>Lift or Zing™</strong>, your privacy is important to us. This policy outlines how we handle your data.</p>
+    <p>At <strong>Lift or Zing™</strong>, your privacy is important to us. This policy outlines how we handle your data.</p>
 
-  <h2>1. No Personal Data Collected</h2>
-  <p>You can use Lift or Zing™ without registering, logging in, or providing any contact details. We do not collect any personal information directly.</p>
+    <h2>1. No Personal Data Collected</h2>
+    <p>You can use Lift or Zing™ without registering, logging in, or providing any contact details. We do not collect any personal information directly.</p>
 
-  <h2>2. Uploaded Images</h2>
-  <p>When you upload a photo, it is temporarily processed to generate a fun response. We do not store, save, or share any images you upload.</p>
+    <h2>2. Uploaded Images</h2>
+    <p>When you upload a photo, it is temporarily processed to generate a fun response. We do not store, save, or share any images you upload.</p>
 
-  <h2>3. Third-Party AI Services</h2>
-  <p>We use services like Hugging Face to generate responses. Your input (text or image) may be processed by their servers, but we do not control how they handle this data. Review their privacy policies for more information.</p>
+    <h2>3. Third-Party AI Services</h2>
+    <p>We use services like Hugging Face to generate responses. Your input (text or image) may be processed by their servers, but we do not control how they handle this data. Review their privacy policies for more information.</p>
 
-  <h2>4. Cookies and Tracking</h2>
-  <p>We use cookies through Google Analytics to help us understand how visitors use Lift or Zing™ and to improve user experience.</p>
-  <p>You can opt out of Google Analytics tracking using browser extensions or by disabling cookies in your browser settings.</p>
+    <h2>4. Cookies and Tracking</h2>
+    <p>We use cookies through Google Analytics to help us understand how visitors use Lift or Zing™ and to improve user experience.</p>
+    <p>You can opt out of Google Analytics tracking using browser extensions or by disabling cookies in your browser settings.</p>
 
-  <h2>5. Children's Privacy</h2>
-  <p>Lift or Zing™ is designed for users age 13 and up. We do not knowingly collect data from children under 13.</p>
+    <h2>5. Children's Privacy</h2>
+    <p>Lift or Zing™ is designed for users age 13 and up. We do not knowingly collect data from children under 13.</p>
 
-  <h2>6. Changes to this Policy</h2>
-  <p>We may update this policy occasionally. Any major changes will be noted on this page.</p>
+    <h2>6. Changes to this Policy</h2>
+    <p>We may update this policy occasionally. Any major changes will be noted on this page.</p>
 
-  <h2>7. Contact</h2>
-  <p>If you have questions about this privacy policy, please contact us at <a href="mailto:pickaside@liftorzing.com">pickaside@liftorzing.com</a></p>
+    <h2>7. Contact</h2>
+    <p>If you have questions about this privacy policy, please contact us at <a href="mailto:pickaside@liftorzing.com">pickaside@liftorzing.com</a></p>
+  </div>
 </body>
 </html>
