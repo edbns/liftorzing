@@ -304,9 +304,11 @@
           output.style.transform = 'translate(0)';
           output.style.textShadow = '0 0 5px rgba(0, 255, 0, 0.7)';
           
-          // After animation completes, redirect to form page with the randomly chosen mode
+          // After animation completes, set sessionStorage and redirect to index.html
           setTimeout(function() {
-            window.location.href = 'index.html?form=true&type=' + mode;
+            sessionStorage.setItem('showForm', 'true');
+            sessionStorage.setItem('formType', mode);
+            window.location.href = 'index.html';
           }, 800);
         }, 150);
       }, 200);
