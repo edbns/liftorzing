@@ -7,22 +7,27 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-T2SWTK7R02');
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/png" href="4phsyuax2w.png">
   
-  <!-- SEO & Social Meta Tags -->
-  <title>LiftorZing – Choose Your Mood: Get Uplifted or Roasted</title>
-  <meta name="description" content="Pick a door. Get a mood. LiftorZing gives you daily uplifting messages or savage roasts. Skyla inspires, Zack roasts. Flip your vibe. Choose your fate.">
-  <meta name="keywords" content="LiftorZing, pick a door game, get roasted or uplifted, mood-based messages, motivational or savage quotes, Skyla, Zack, inspirational or sarcastic messages, choose your fate, funny daily quotes">
-  <meta property="og:title" content="LiftorZing – Pick a Door, Pick Your Fate" />
-  <meta property="og:description" content="A playful web experience: Choose the Lift door for an uplifting quote or the Zing door for a witty roast. Skyla motivates. Zack zings. It's mood therapy – with a twist." />
-  <meta property="og:image" content="https://liftorzing.com/images/social-preview.png" />
+  <!-- SEO & Social Meta Tags (from remote) -->
+  <title>Lift or Zing™ – One Mystery Door. One Fate.</title>
+  <meta name="description" content="You don't choose. One door decides. Get roasted 💀 or uplifted 💫 in seconds. Enter Lift or Zing™ and face your surprise fate." />
+  <meta name="keywords" content="Lift or Zing™, pick a door game, get roasted or uplifted, mood-based messages, motivational or savage quotes, inspirational or sarcastic messages, choose your fate, funny daily quotes">
+  <!-- Facebook & LinkedIn -->
+  <meta property="og:title" content="Lift or Zing™" />
+  <meta property="og:description" content="Roasted or uplifted – your fate is decided by one mystery door." />
+  <meta property="og:image" content="https://liftorzing.com/social-preview.jpg" />
   <meta property="og:url" content="https://liftorzing.com" />
+  <meta property="og:type" content="website" />
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Lift or Zing™" />
+  <meta name="twitter:description" content="One click. One fate. Get roasted 💀 or uplifted 💫 at liftorzing.com" />
+  <meta name="twitter:image" content="https://liftorzing.com/social-preview.jpg" />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   
 
@@ -1239,6 +1244,18 @@
         <button type="button" class="intensity-btn" data-intensity="intense" onclick="setIntensity('intense')">Intense</button>
       </div>
       <button type="submit" class="action-button" id="submit-btn">Generate Message</button>
+      
+      <!-- Spinner -->
+      <div id="loading" style="display: none; margin-top: 20px; text-align: center; color: white;">
+        <div class="spinner" style="display: inline-block; width: 24px; height: 24px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: white; animation: spin 1s ease-in-out infinite;"></div>
+        <div style="margin-top: 10px;">Generating message…</div>
+      </div>
+      
+      <style>
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      </style>
     </form>
   </div>
 
@@ -2519,7 +2536,7 @@
         const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
         const cleanTitle = messageTitle.textContent.replace(/[^a-zA-Z0-9]/g, '_');
         const cleanFormat = format.name.replace(/[^a-zA-Z0-9]/g, '_');
-        a.download = `LiftorZing_${cleanTitle}_${cleanFormat}_video.${extension}`;
+        a.download = `LiftOrZing_${cleanTitle}_${cleanFormat}_video.${extension}`;
         
         // Force download by adding to DOM and clicking
         a.style.display = 'none';
@@ -2788,83 +2805,107 @@
     function generateMessage(event) {
       event.preventDefault();
       
-      // Validate input method requirements
-      if (currentInputMethod === 'text') {
-        const keywords = document.getElementById('keywords-textarea').value.trim();
-        if (!keywords) {
-          alert('Please describe your mood or upload a photo to continue.');
-          return;
+      // Show loading indicator
+      document.getElementById("loading").style.display = "block";
+      
+      // Disable submit button
+      const submitBtn = document.getElementById("submit-btn");
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = "0.7";
+      
+      try {
+        // Validate input method requirements
+        if (currentInputMethod === 'text') {
+          const keywords = document.getElementById('keywords-textarea').value.trim();
+          if (!keywords) {
+            alert('Please describe your mood or upload a photo to continue.');
+            hideLoadingAndEnableButton();
+            return;
+          }
+        } else if (currentInputMethod === 'photo') {
+          const photoFile = document.getElementById('photo-upload').files[0];
+          if (!photoFile) {
+            alert('Please upload a photo or describe your mood to continue.');
+            hideLoadingAndEnableButton();
+            return;
+          }
         }
-      } else if (currentInputMethod === 'photo') {
-        const photoFile = document.getElementById('photo-upload').files[0];
-        if (!photoFile) {
-          alert('Please upload a photo or describe your mood to continue.');
-          return;
-        }
+        
+        // Get form values
+        const form = document.getElementById('mood-form');
+        const formData = new FormData(form);
+        const name = formData.get('name');
+        const gender = formData.get('gender') || 'person';
+        const keywords = formData.get('keywords') || '';
+        const photoFile = formData.get('photo');
+        
+        // Show loading state
+        showLoadingState();
+        
+        // Prepare data for API call
+        const requestData = {
+          name: name,
+          gender: gender,
+          mood: keywords,
+          intensity: selectedIntensity,
+          type: currentType,
+          hasPhoto: photoFile && photoFile.size > 0
+        };
+        
+        // Call Netlify function - use relative path for development and deployed environments
+        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? 'http://localhost:8888/.netlify/functions/generate'  // Local development 
+          : '/.netlify/functions/generate';                     // Production deployment
+        
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        })
+        .then(response => {
+          // Check if response is OK before trying to parse JSON
+          if (!response.ok) {
+            throw new Error(`API responded with status ${response.status}`);
+          }
+          // Check content type to ensure it's actually JSON
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error(`Expected JSON response but got ${contentType}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          hideLoadingState();
+          hideLoadingAndEnableButton();
+          
+          if (data.error) {
+            console.error('API Error:', data.error);
+            // Fallback to local generation on error
+            generateLocalMessage(name, gender, keywords, selectedIntensity, photoFile);
+          } else {
+            displayGeneratedMessage(data.title, data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Network or Parsing Error:', error);
+          hideLoadingState();
+          hideLoadingAndEnableButton();
+          // Fallback to local generation on network error
+          generateLocalMessage(name, gender, keywords, selectedIntensity, photoFile);
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        hideLoadingAndEnableButton();
       }
       
-      // Get form values
-      const form = document.getElementById('mood-form');
-      const formData = new FormData(form);
-      const name = formData.get('name');
-      const gender = formData.get('gender') || 'person';
-      const keywords = formData.get('keywords') || '';
-      const photoFile = formData.get('photo');
-      
-      // Show loading state
-      showLoadingState();
-      
-      // Prepare data for API call
-      const requestData = {
-        name: name,
-        gender: gender,
-        mood: keywords,
-        intensity: selectedIntensity,
-        type: currentType,
-        hasPhoto: photoFile && photoFile.size > 0
-      };
-      
-      // Call Netlify function - use relative path for development and deployed environments
-      const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:8888/.netlify/functions/generate'  // Local development 
-        : '/.netlify/functions/generate';                     // Production deployment
-      
-      fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
-      })
-      .then(response => {
-        // Check if response is OK before trying to parse JSON
-        if (!response.ok) {
-          throw new Error(`API responded with status ${response.status}`);
-        }
-        // Check content type to ensure it's actually JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error(`Expected JSON response but got ${contentType}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        hideLoadingState();
-        
-        if (data.error) {
-          console.error('API Error:', data.error);
-          // Fallback to local generation on error
-          generateLocalMessage(name, gender, keywords, selectedIntensity, photoFile);
-        } else {
-          displayGeneratedMessage(data.title, data.message);
-        }
-      })
-      .catch(error => {
-        console.error('Network or Parsing Error:', error);
-        hideLoadingState();
-        // Fallback to local generation on network error
-        generateLocalMessage(name, gender, keywords, selectedIntensity, photoFile);
-      });
+      // Helper function to hide loading and enable button
+      function hideLoadingAndEnableButton() {
+        document.getElementById("loading").style.display = "none";
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = "1";
+      }
     }
     
     function showLoadingState() {
@@ -3167,22 +3208,22 @@
       <h1>Disclaimer</h1>
       <p><strong>Effective Date:</strong> July 22, 2025</p>
       
-      <p>Welcome to <strong>LiftorZing</strong> (https://liftorzing.com), a website created to entertain, uplift, or playfully roast users based on their selected mood.</p>
+      <p>Welcome to <strong>Lift or Zing™</strong> (https://liftorzing.com), a website created to entertain, uplift, or playfully roast users based on their selected mood.</p>
       
       <h2>1. Entertainment Purposes Only</h2>
       <p>All content, including messages, roasts, and quotes, are generated for entertainment purposes only and should not be considered personal, medical, or professional advice.</p>
       
       <h2>2. AI-Generated Responses</h2>
-      <p>LiftorZing responses are automatically generated by AI. We cannot guarantee their accuracy, appropriateness, or relevance. Use discretion when interpreting content.</p>
+      <p>Lift or Zing™ responses are automatically generated by AI. We cannot guarantee their accuracy, appropriateness, or relevance. Use discretion when interpreting content.</p>
       
       <h2>3. Humor & Sensitivity</h2>
       <p>Zing responses are designed to be funny, sarcastic, or edgy. If you are sensitive to this type of humor, we recommend sticking to the Lift side of the experience.</p>
       
       <h2>4. Uploaded Content</h2>
-      <p>Any uploaded content is processed only to deliver AI responses and is not saved or shared by LiftorZing. You are responsible for what you upload.</p>
+      <p>Any uploaded content is processed only to deliver AI responses and is not saved or shared by Lift or Zing™. You are responsible for what you upload.</p>
       
       <h2>5. No Liability</h2>
-      <p>LiftorZing and its creators shall not be held liable for any emotional, mental, or social impact resulting from the use of this website.</p>
+      <p>Lift or Zing™ and its creators shall not be held liable for any emotional, mental, or social impact resulting from the use of this website.</p>
       
       <h2>6. Contact</h2>
       <p>If you have questions about this disclaimer, email us at <a href="mailto:pickaside@liftorzing.com">pickaside@liftorzing.com</a></p>
@@ -3254,7 +3295,7 @@
     flex-wrap: wrap;
   ">
     <div style="flex: 1; margin-right: 1rem;">
-      We use cookies to improve your experience. By using LiftorZing, you agree to our
+      We use cookies to improve your experience. By using Lift or Zing™, you agree to our
       <a href="/privacy.html" style="color: #000000; text-decoration: underline;">Privacy Policy</a>.
     </div>
     <button onclick="acceptCookies()" style="
