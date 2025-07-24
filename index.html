@@ -13,16 +13,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/png" href="4phsyuax2w.png">
   
-  <!-- SEO & Social Meta Tags (from remote) -->
+  <!-- SEO & Social Meta Tags -->
   <title>Lift or Zing™ – One Mystery Door. One Fate.</title>
   <meta name="description" content="You don't choose. One door decides. Get roasted 💀 or uplifted 💫 in seconds. Enter Lift or Zing™ and face your surprise fate." />
   <meta name="keywords" content="Lift or Zing™, pick a door game, get roasted or uplifted, mood-based messages, motivational or savage quotes, inspirational or sarcastic messages, choose your fate, funny daily quotes">
+  
   <!-- Facebook & LinkedIn -->
   <meta property="og:title" content="Lift or Zing™" />
   <meta property="og:description" content="Roasted or uplifted – your fate is decided by one mystery door." />
   <meta property="og:image" content="https://liftorzing.com/social-preview.jpg" />
   <meta property="og:url" content="https://liftorzing.com" />
   <meta property="og:type" content="website" />
+  
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Lift or Zing™" />
@@ -43,6 +45,16 @@
     html, body {
       height: 100%;
       font-family: 'JetBrains Mono', monospace;
+    }
+    
+    /* Post-transition screens: full black background */
+    body:not(.home-page) {
+      background-color: #000;
+      color: #fff;
+    }
+    
+    body:not(.home-page) html {
+      background-color: #000;
     }
 
     #container {
@@ -965,42 +977,197 @@
     
     /* Removed emotion-feedback styling */
     
-    .share-buttons {
+    /* Share Container Styles */
+    .share-container {
+      position: relative;
       margin-top: 30px;
       display: flex;
-      gap: 16px;
       justify-content: center;
-      flex-wrap: wrap;
       max-width: 600px;
       margin-left: auto;
       margin-right: auto;
     }
     
-    .share-btn {
-      width: 48px;
-      height: 48px;
-      background: black;
+    /* Main Share Button */
+    .main-share-btn {
+      width: 54px;
+      height: 54px;
+      background: #000;
       color: white;
       border: none;
-      border-radius: 50%; /* Circle buttons */
+      border-radius: 50%;
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
       transition: all 0.3s ease;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+      padding: 0;
+      z-index: 10;
+    }
+    
+    .main-share-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .main-share-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.4);
+      background: #222;
+    }
+    
+    /* Share Menu Overlay */
+    .share-menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 998;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    /* Share Menu */
+    .share-menu {
+      display: none;
+      position: absolute;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+      pointer-events: none;
+    }
+    
+    .share-menu.active {
+      display: block;
+      opacity: 1;
+      pointer-events: all;
+    }
+    
+    /* Desktop Specific Menu Styling */
+    @media (min-width: 769px) {
+      .share-menu {
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        margin-bottom: 15px;
+        width: auto;
+      }
+      
+      .share-menu.active {
+        transform: translateX(-50%) translateY(0);
+      }
+      
+      .share-menu-title {
+        display: none;
+      }
+      
+      .close-share-menu {
+        display: none;
+      }
+    }
+    
+    /* Mobile Specific Menu Styling */
+    @media (max-width: 768px) {
+      .share-menu {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        transform: translateY(100%);
+      }
+      
+      .share-menu.active {
+        transform: translateY(0);
+      }
+      
+      .share-menu-title {
+        display: block;
+        text-align: center;
+        font-family: 'Orbitron', monospace;
+        font-weight: 700;
+        font-size: 18px;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+    }
+    
+    /* Share Menu Content */
+    .share-menu-content {
+      background: #111;
+      color: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Close Button for Share Menu */
+    .close-share-menu {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .close-share-menu svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    /* Share Buttons Grid */
+    .share-buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding: 24px;
+    }
+    
+    @media (max-width: 768px) {
+      .share-buttons-grid {
+        grid-template-columns: repeat(4, 1fr);
+        padding: 24px 30px 36px;
+      }
+    }
+    
+    /* Share Menu Buttons */
+    .share-menu-btn {
+      width: 54px;
+      height: 54px;
+      background: #222;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.25s ease;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.25);
       padding: 0;
     }
     
-    .share-btn svg {
-      width: 20px;
-      height: 20px;
+    .share-menu-btn svg {
+      width: 22px;
+      height: 22px;
     }
     
-    .share-btn:hover {
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      background: #333333;
+    .share-menu-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+      background: #333;
     }
     
     .intensity-selector {
@@ -1055,7 +1222,7 @@
       <!-- Mystery Door -->
       <a href="transition.html" style="text-decoration: none;">
         <div class="mystery-door">
-          <div class="door-text">MYSTERY</div>
+          <div class="door-text">VIBE</div>
         </div>
       </a>
     </div>
@@ -1067,50 +1234,82 @@
     <button class="close-btn" onclick="closeMessage()">×</button>
     <h2 id="message-title" style="font-family: 'Orbitron', monospace; color: white; margin-bottom: 60px; display: flex; justify-content: center; align-items: center; text-transform: uppercase; letter-spacing: 2px;"></h2>
     <div id="message-content" style="font-family: 'JetBrains Mono', monospace; margin: 40px 0; line-height: 1.6; text-align: left; padding: 30px 20px; border-radius: 0px; background: rgba(0,0,0,0.05); position: relative; letter-spacing: 0.5px;"></div>
-    <div class="share-buttons">
-      <button class="share-btn copy" onclick="copyMessage()" aria-label="Copy to clipboard">
+    <div class="share-container">
+      <button id="main-share-button" class="main-share-btn" aria-label="Share">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          <circle cx="18" cy="5" r="3"></circle>
+          <circle cx="6" cy="12" r="3"></circle>
+          <circle cx="18" cy="19" r="3"></circle>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
         </svg>
       </button>
-      <button class="share-btn instagram" onclick="showImageOptions('instagram')" aria-label="Share on Instagram">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-        </svg>
-      </button>
-      <button class="share-btn twitter" onclick="showImageOptions('twitter')" aria-label="Share on Twitter/X">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-        </svg>
-      </button>
-      <button class="share-btn whatsapp" onclick="showImageOptions('whatsapp')" aria-label="Share on WhatsApp">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.488"/>
-        </svg>
-      </button>
-      <button class="share-btn telegram" onclick="showImageOptions('telegram')" aria-label="Share on Telegram">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-        </svg>
-      </button>
-      <button class="share-btn facebook" onclick="showImageOptions('facebook')" aria-label="Share on Facebook">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-        </svg>
-      </button>
-      <button class="share-btn reddit" onclick="showImageOptions('reddit')" aria-label="Share on Reddit">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
-        </svg>
-      </button>
-      <button class="share-btn download" onclick="downloadMessage()" aria-label="Save message">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7,10 12,15 17,10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-      </button>
+      
+      <!-- Share Menu Overlay (mobile) -->
+      <div id="share-menu-overlay" class="share-menu-overlay"></div>
+      
+      <!-- Share Menu (Both Mobile & Desktop) -->
+      <div id="share-menu" class="share-menu">
+        <div class="share-menu-content">
+          <!-- Close button for mobile menu -->
+          <button id="close-share-menu" class="close-share-menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          
+          <!-- Share Menu Title (Mobile only) -->
+          <div class="share-menu-title">Share</div>
+          
+          <!-- Share Options -->
+          <div class="share-buttons-grid">
+            <button class="share-menu-btn copy" onclick="copyMessage()" aria-label="Copy to clipboard">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+            <button class="share-menu-btn instagram" onclick="showImageOptions('instagram')" aria-label="Share on Instagram">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn twitter" onclick="showImageOptions('twitter')" aria-label="Share on Twitter/X">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn whatsapp" onclick="showImageOptions('whatsapp')" aria-label="Share on WhatsApp">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.488"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn telegram" onclick="showImageOptions('telegram')" aria-label="Share on Telegram">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn facebook" onclick="showImageOptions('facebook')" aria-label="Share on Facebook">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn reddit" onclick="showImageOptions('reddit')" aria-label="Share on Reddit">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn download" onclick="downloadMessage()" aria-label="Save message">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7,10 12,15 17,10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- Image Options Modal -->
@@ -1260,6 +1459,69 @@
   </div>
 
   <script>
+    // Share Menu Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const mainShareButton = document.getElementById('main-share-button');
+      const shareMenu = document.getElementById('share-menu');
+      const shareMenuOverlay = document.getElementById('share-menu-overlay');
+      const closeShareMenuBtn = document.getElementById('close-share-menu');
+      
+      // Toggle share menu
+      function toggleShareMenu() {
+        if (shareMenu.classList.contains('active')) {
+          closeShareMenu();
+        } else {
+          openShareMenu();
+        }
+      }
+      
+      // Open share menu
+      function openShareMenu() {
+        // Display menu and overlay before adding active class for transition
+        shareMenu.style.display = 'block';
+        shareMenuOverlay.style.display = 'block';
+        
+        // Force reflow
+        void shareMenu.offsetWidth;
+        
+        // Add active classes
+        shareMenu.classList.add('active');
+        shareMenuOverlay.classList.add('active');
+        shareMenuOverlay.style.opacity = '1';
+        
+        // Detect if mobile for different behavior
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          document.body.style.overflow = 'hidden'; // Prevent body scrolling on mobile
+        }
+      }
+      
+      // Close share menu
+      function closeShareMenu() {
+        shareMenu.classList.remove('active');
+        shareMenuOverlay.style.opacity = '0';
+        
+        // Wait for transition to complete before hiding elements
+        setTimeout(() => {
+          shareMenu.style.display = 'none';
+          shareMenuOverlay.style.display = 'none';
+          document.body.style.overflow = ''; // Restore body scrolling
+        }, 300);
+      }
+      
+      // Event listeners
+      mainShareButton.addEventListener('click', toggleShareMenu);
+      closeShareMenuBtn.addEventListener('click', closeShareMenu);
+      shareMenuOverlay.addEventListener('click', closeShareMenu);
+      
+      // Close on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && shareMenu.classList.contains('active')) {
+          closeShareMenu();
+        }
+      });
+    });
+    
     // Check URL parameters on page load
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -2014,8 +2276,8 @@
       document.getElementById('preview-container').style.display = 'none';
     }
     
-    function generateAndDownloadImage(platform, format) {
-      generateMessageImage(format.width, format.height, format.name).then(blob => {
+    function generateAndDownloadImage(platform, format, colorOptions = null) {
+      generateMessageImage(format.width, format.height, format.name, colorOptions).then(blob => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -2095,7 +2357,7 @@
       });
     }
     
-    function generateMessageImage(width = 1080, height = 1080, formatName = 'Default') {
+    function generateMessageImage(width = 1080, height = 1080, formatName = 'Default', colorOptions = null) {
       return new Promise((resolve, reject) => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -2103,71 +2365,97 @@
         canvas.width = width;
         canvas.height = height;
         
-        // Background
-        ctx.fillStyle = '#ffffff';
+        // Use color options or defaults
+        const colors = colorOptions || {
+          background: '#ffffff',
+          text: '#000000',
+          border: '#000000',
+          cursor: '#000000'
+        };
+        
+        // Clear and fill background
+        ctx.fillStyle = colors.background;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Add border
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = Math.max(4, Math.min(width, height) * 0.008);
-        const borderOffset = ctx.lineWidth;
-        ctx.strokeRect(borderOffset, borderOffset, canvas.width - (borderOffset * 2), canvas.height - (borderOffset * 2));
+        // Calculate responsive dimensions (matching new design)
+        const baseSize = Math.min(width, height);
+        const padding = baseSize * 0.08;
+        const cardPadding = baseSize * 0.06;
         
-        // Calculate responsive font sizes - optimized for different aspect ratios
-        const isSquareFormat = Math.abs(width - height) < 20; // Check if it's close to square format
-        const aspectRatio = width / height;
+        // Draw card with shadow
+        const cardX = padding;
+        const cardY = padding;
+        const cardWidth = width - (padding * 2);
+        const cardHeight = height - (padding * 2);
         
-        // Adjust font sizes based on format - smaller fonts for square formats to fit more content
-        let fontMultiplier = isSquareFormat ? 0.045 : 0.055; // Smaller for square formats
-        if (aspectRatio > 1.5) fontMultiplier = 0.06; // Larger for wide formats
+        // Shadow effect
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        ctx.shadowBlur = baseSize * 0.012;
+        ctx.shadowOffsetX = baseSize * 0.004;
+        ctx.shadowOffsetY = baseSize * 0.006;
         
-        const baseFontSize = Math.min(width, height) * fontMultiplier;
-        const titleFontSize = baseFontSize * (isSquareFormat ? 1.1 : 1.3); // Smaller title for squares
-        const contentFontSize = baseFontSize * (isSquareFormat ? 0.75 : 0.85); // Smaller content for squares
-        const footerFontSize = baseFontSize * 0.55;
+        // Card background
+        ctx.fillStyle = colors.background;
+        ctx.fillRect(cardX, cardY, cardWidth, cardHeight);
         
-        // Title - get the title content
-        const title = messageTitle.innerHTML; // Get HTML content to preserve spaces
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
         
-        // Parse the title to maintain our spacing in the image
-        let processedTitle = title;
-        // If we're using HTML for spacing, extract just the text parts
-        if (title.includes('<span')) {
-          // Extract the name part and the type part
-          const namePart = title.split('<span')[0].trim();
-          const typePart = title.split('</span>')[1].trim();
-          // Create processed title with moderate spacing
-          processedTitle = `${namePart}   ${typePart}`;
-        }
+        // Thin border
+        ctx.strokeStyle = colors.border === '#000000' ? '#333333' : colors.border;
+        ctx.lineWidth = Math.max(1, baseSize * 0.002);
+        ctx.strokeRect(cardX, cardY, cardWidth, cardHeight);
         
-        ctx.fillStyle = '#000000';
-        ctx.font = `bold ${titleFontSize}px Arial, sans-serif`;
+        // Calculate typography (matching new design)
+        const titleFontSize = baseSize * 0.055;
+        const contentFontSize = baseSize * 0.032;
+        const footerFontSize = baseSize * 0.022;
+        
+        // Modern font stack
+        const titleFont = `bold ${titleFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+        const contentFont = `${contentFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+        const footerFont = `${footerFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+        
+        // Get title text (clean)
+        const title = messageTitle.textContent.trim();
+        
+        // Title positioning with better hierarchy
+        ctx.fillStyle = colors.text;
+        ctx.font = titleFont;
         ctx.textAlign = 'center';
+        const titleY = cardY + cardPadding + titleFontSize;
         
-        // Handle long titles
-        const titleMaxWidth = width - 60;
-        if (ctx.measureText(processedTitle).width > titleMaxWidth) {
-          ctx.font = `bold ${titleFontSize * 0.8}px Arial, sans-serif`;
+        // Add accent color for protocol activation
+        if (title.includes('LIFT') || title.includes('PROTOCOL')) {
+          ctx.fillStyle = '#00ff88'; // Neon green accent
+        } else if (title.includes('ZING') || title.includes('ROAST')) {
+          ctx.fillStyle = '#ff4466'; // Neon red accent
         }
         
-        // Center title vertically with proper margins
-        const titleY = (height * 0.15) + titleFontSize;
-        ctx.fillText(processedTitle, canvas.width / 2, titleY);
+        // Generous vertical spacing between title and content (matching new design)
+        const titleContentGap = baseSize * 0.08;
         
-        // Content
-        const content = messageContent.textContent;
-        const maxWidth = canvas.width - (isSquareFormat ? 80 : 100); // Tighter margins for square formats
-        const lineHeight = contentFontSize * (isSquareFormat ? 1.4 : 1.6); // Tighter line height for squares
-        // Start content below the title with proper spacing
-        const titleGap = isSquareFormat ? (height * 0.04) : (height * 0.06); // Smaller gap for squares
-        let y = (height * 0.15) + titleFontSize + titleGap;
-        
-        ctx.font = `${contentFontSize}px Arial, sans-serif`;
+        // Content area setup
+        ctx.fillStyle = colors.text;
+        ctx.font = contentFont;
         ctx.textAlign = 'left';
         
-        // This function is now replaced by localWrapText
+        // Content positioning
+        const contentStartY = titleY + titleContentGap;
+        const contentMaxWidth = cardWidth - (cardPadding * 2);
+        const contentX = cardX + cardPadding;
         
-        // Define wrapText function in the local scope if needed
+        // Wrap text for optimal line length (40-50 characters)
+        const targetLineLength = 45;
+        const charWidth = ctx.measureText('M').width; // Monospace character width
+        const maxCharsPerLine = Math.floor(contentMaxWidth / charWidth);
+        const actualCharsPerLine = Math.min(targetLineLength, maxCharsPerLine);
+        const actualMaxWidth = charWidth * actualCharsPerLine;
+        
+        // Local text wrapping function
         function localWrapText(text, maxWidth) {
           const words = text.split(' ');
           const lines = [];
@@ -2175,33 +2463,54 @@
           
           for (const word of words) {
             const testLine = currentLine + (currentLine ? ' ' : '') + word;
-            const metrics = ctx.measureText(testLine);
-            
-            if (metrics.width > maxWidth && currentLine) {
-              lines.push(currentLine);
-              currentLine = word;
-            } else {
+            if (ctx.measureText(testLine).width <= maxWidth) {
               currentLine = testLine;
+            } else {
+              if (currentLine) lines.push(currentLine);
+              currentLine = word;
             }
           }
-          
-          if (currentLine) {
-            lines.push(currentLine);
-          }
-          
+          if (currentLine) lines.push(currentLine);
           return lines;
         }
         
-        const lines = localWrapText(content, maxWidth);
-        // Calculate available height considering footer space - optimized for square formats
-        const footerSpace = isSquareFormat ? (height * 0.10) : (height * 0.12); // Less footer space for squares
-        const availableHeight = canvas.height - y - footerSpace;
-        const maxLines = Math.floor(availableHeight / lineHeight);
+        const content = messageContent.textContent;
+        const lines = localWrapText(content, actualMaxWidth);
         
-        const leftMargin = isSquareFormat ? 40 : 50; // Tighter margin for squares
-        for (let i = 0; i < Math.min(lines.length, maxLines); i++) {
-          ctx.fillText(lines[i], leftMargin, y + (i * lineHeight));
+        // Calculate line height for readability
+        const lineHeight = contentFontSize * 1.6;
+        
+        // Footer space reservation
+        const footerHeight = baseSize * 0.12;
+        const availableContentHeight = cardHeight - (titleY - cardY) - titleContentGap - footerHeight;
+        const maxContentLines = Math.floor(availableContentHeight / lineHeight);
+        
+        // Draw content lines
+        let contentY = contentStartY;
+        const linesToShow = Math.min(lines.length, maxContentLines);
+        
+        for (let i = 0; i < linesToShow; i++) {
+          ctx.fillText(lines[i], contentX, contentY);
+          contentY += lineHeight;
         }
+        
+        // Footer area with attribution
+        const footerY = cardY + cardHeight - cardPadding;
+        
+        // Subtle divider line
+        ctx.beginPath();
+        ctx.strokeStyle = colors.text === '#ffffff' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)';
+        ctx.lineWidth = 1;
+        const dividerY = footerY - (footerFontSize * 2);
+        ctx.moveTo(contentX, dividerY);
+        ctx.lineTo(contentX + actualMaxWidth, dividerY);
+        ctx.stroke();
+        
+        // Footer text
+        ctx.font = footerFont;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = colors.text === '#ffffff' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)';
+        ctx.fillText('Generated by Lift or Zing', width / 2, footerY - (footerFontSize * 0.3));
         
         // Add "Generated by Lift or Zing" at bottom with better positioning
         ctx.font = `${footerFontSize}px Arial, sans-serif`;
@@ -2243,94 +2552,143 @@
         cursor: textColor
       };
       
-      // Draw the image (non-animated version)
+      // Clear and fill background
       ctx.fillStyle = colorOptions.background;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Add border
-      ctx.strokeStyle = colorOptions.border;
-      ctx.lineWidth = Math.max(4, Math.min(canvas.width, canvas.height) * 0.008);
-      const borderOffset = ctx.lineWidth;
-      ctx.strokeRect(borderOffset, borderOffset, canvas.width - (borderOffset * 2), canvas.height - (borderOffset * 2));
+      // Calculate responsive dimensions
+      const baseSize = Math.min(canvas.width, canvas.height);
+      const padding = baseSize * 0.08; // 8% padding
+      const cardPadding = baseSize * 0.06; // 6% inner card padding
       
-      // Calculate font sizes - optimized for different aspect ratios
-      const isSquareFormat = Math.abs(canvas.width - canvas.height) < 20; // Check if it's close to square format
-      const aspectRatio = canvas.width / canvas.height;
+      // Draw subtle card background with shadow effect
+      const cardX = padding;
+      const cardY = padding;
+      const cardWidth = canvas.width - (padding * 2);
+      const cardHeight = canvas.height - (padding * 2);
       
-      // Adjust font sizes based on format - smaller fonts for square formats to fit more content
-      let fontMultiplier = isSquareFormat ? 0.045 : 0.055; // Smaller for square formats
-      if (aspectRatio > 1.5) fontMultiplier = 0.06; // Larger for wide formats
+      // Shadow effect
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+      ctx.shadowBlur = baseSize * 0.012;
+      ctx.shadowOffsetX = baseSize * 0.004;
+      ctx.shadowOffsetY = baseSize * 0.006;
       
-      const baseFontSize = Math.min(canvas.width, canvas.height) * fontMultiplier;
-      const titleFontSize = baseFontSize * (isSquareFormat ? 1.1 : 1.3); // Smaller title for squares
-      const contentFontSize = baseFontSize * (isSquareFormat ? 0.75 : 0.85); // Smaller content for squares
+      // Card background
+      ctx.fillStyle = colorOptions.background;
+      ctx.fillRect(cardX, cardY, cardWidth, cardHeight);
       
-      // Draw title with proper spacing
-      // Parse the title to maintain our spacing in the image
-      const title = messageTitle.innerHTML; // Get HTML content to preserve spaces
-      let processedTitle = title;
+      // Reset shadow
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
       
-      // If we're using HTML for spacing, extract just the text parts
-      if (title.includes('<span')) {
-        // Extract the name part and the type part
-        const namePart = title.split('<span')[0].trim();
-        const typePart = title.split('</span>')[1].trim();
-        // Create processed title with moderate spacing
-        processedTitle = `${namePart}   ${typePart}`;
+      // Thin border
+      ctx.strokeStyle = borderColor === '#000000' ? '#333333' : colorOptions.border;
+      ctx.lineWidth = Math.max(1, baseSize * 0.002);
+      ctx.strokeRect(cardX, cardY, cardWidth, cardHeight);
+      
+      // Calculate typography
+      const titleFontSize = baseSize * 0.055; // Larger title
+      const contentFontSize = baseSize * 0.032; // Balanced content
+      const footerFontSize = baseSize * 0.022; // Smaller footer
+      
+      // Modern font stack
+      const titleFont = `bold ${titleFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+      const contentFont = `${contentFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+      const footerFont = `${footerFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+      
+      // Get title text (clean)
+      const title = messageTitle.textContent.trim();
+      
+      // Title positioning with better hierarchy
+      ctx.fillStyle = colorOptions.text;
+      ctx.font = titleFont;
+      ctx.textAlign = 'center';
+      const titleY = cardY + cardPadding + titleFontSize;
+      
+      // Add accent color for protocol activation
+      if (title.includes('LIFT') || title.includes('PROTOCOL')) {
+        ctx.fillStyle = '#00ff88'; // Neon green accent
+      } else if (title.includes('ZING') || title.includes('ROAST')) {
+        ctx.fillStyle = '#ff4466'; // Neon red accent
       }
       
-      ctx.fillStyle = colorOptions.text;
-      ctx.font = `bold ${titleFontSize}px Arial, sans-serif`;
-      ctx.textAlign = 'center';
-      // Center title vertically with proper margins
-      const titleY = (canvas.height * 0.15) + titleFontSize;
-      ctx.fillText(processedTitle, canvas.width / 2, titleY);
+      ctx.fillText(title, canvas.width / 2, titleY);
       
-      // Draw content
-      ctx.font = `${contentFontSize}px Arial, sans-serif`;
+      // Generous vertical spacing between title and content
+      const titleContentGap = baseSize * 0.08; // 8% gap
+      
+      // Content area setup
+      ctx.fillStyle = colorOptions.text;
+      ctx.font = contentFont;
       ctx.textAlign = 'left';
       
-      // Wrap text with improved spacing
-      const maxWidth = canvas.width - (isSquareFormat ? 80 : 100); // Tighter margins for square formats
-      // Fix: Call wrapText with proper context
+      // Content positioning
+      const contentStartY = titleY + titleContentGap;
+      const contentMaxWidth = cardWidth - (cardPadding * 2);
+      const contentX = cardX + cardPadding;
+      
+      // Wrap text for optimal line length (40-50 characters)
+      const targetLineLength = 45;
+      const charWidth = ctx.measureText('M').width; // Monospace character width
+      const maxCharsPerLine = Math.floor(contentMaxWidth / charWidth);
+      const actualCharsPerLine = Math.min(targetLineLength, maxCharsPerLine);
+      const actualMaxWidth = charWidth * actualCharsPerLine;
+      
       let lines = [];
       if (typeof wrapText === 'function') {
-        lines = wrapText(messageContent.textContent, maxWidth, ctx);
+        lines = wrapText(messageContent.textContent, actualMaxWidth, ctx);
+      } else {
+        // Fallback text wrapping
+        const words = messageContent.textContent.split(' ');
+        let currentLine = '';
+        for (const word of words) {
+          const testLine = currentLine + (currentLine ? ' ' : '') + word;
+          if (ctx.measureText(testLine).width <= actualMaxWidth) {
+            currentLine = testLine;
+          } else {
+            if (currentLine) lines.push(currentLine);
+            currentLine = word;
+          }
+        }
+        if (currentLine) lines.push(currentLine);
       }
       
-      // Start content below the title with proper spacing
-      const titleGap = isSquareFormat ? (canvas.height * 0.04) : (canvas.height * 0.06); // Smaller gap for squares
-      let y = (canvas.height * 0.15) + titleFontSize + titleGap;
+      // Calculate line height for readability
+      const lineHeight = contentFontSize * 1.6;
       
-      // Calculate available height considering footer space - optimized for square formats
-      const footerSpace = isSquareFormat ? (canvas.height * 0.10) : (canvas.height * 0.12); // Less footer space for squares
-      const availableHeight = canvas.height - y - footerSpace;
-      const lineHeight = contentFontSize * (isSquareFormat ? 1.4 : 1.6); // Tighter line height for squares
-      const maxLines = Math.floor(availableHeight / lineHeight);
+      // Footer space reservation
+      const footerHeight = baseSize * 0.12;
+      const availableContentHeight = cardHeight - (titleY - cardY) - titleContentGap - footerHeight;
+      const maxContentLines = Math.floor(availableContentHeight / lineHeight);
       
-      const leftMargin = isSquareFormat ? 40 : 50; // Tighter margin for squares
-      for (let i = 0; i < Math.min(lines.length, maxLines); i++) {
-        ctx.fillText(lines[i], leftMargin, y);
-        y += lineHeight;
+      // Draw content lines
+      let contentY = contentStartY;
+      const linesToShow = Math.min(lines.length, maxContentLines);
+      
+      for (let i = 0; i < linesToShow; i++) {
+        ctx.fillText(lines[i], contentX, contentY);
+        contentY += lineHeight;
       }
       
-      // Add attribution with better positioning
-      ctx.font = `${contentFontSize * 0.7}px Arial, sans-serif`;
+      // Footer area with attribution
+      const footerY = cardY + cardHeight - cardPadding;
+      
+      // Subtle divider line
+      ctx.beginPath();
+      ctx.strokeStyle = colorOptions.text === '#ffffff' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)';
+      ctx.lineWidth = 1;
+      const dividerY = footerY - (footerFontSize * 2);
+      ctx.moveTo(contentX, dividerY);
+      ctx.lineTo(contentX + actualMaxWidth, dividerY);
+      ctx.stroke();
+      
+      // Footer text
+      ctx.font = footerFont;
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#666666';
-      const footerY = canvas.height - (canvas.height * 0.05); // Proportional footer positioning
-      
-      // Add subtle divider line for square formats (1:1 ratio)
-      if (Math.abs(canvas.width - canvas.height) < 20) { // Check if it's close to square format
-        ctx.beginPath();
-        ctx.strokeStyle = '#dddddd';
-        ctx.lineWidth = 1;
-        ctx.moveTo(canvas.width * 0.1, footerY - (contentFontSize * 0.7) * 1.5);
-        ctx.lineTo(canvas.width * 0.9, footerY - (contentFontSize * 0.7) * 1.5);
-        ctx.stroke();
-      }
-      
-      ctx.fillText('Generated by Lift or Zing', canvas.width / 2, footerY);
+      ctx.fillStyle = colorOptions.text === '#ffffff' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)';
+      ctx.fillText('Generated by Lift or Zing', canvas.width / 2, footerY - (footerFontSize * 0.3));
       
       // Hide loading indicator
       document.getElementById('preview-loading').style.display = 'none';
@@ -2357,7 +2715,7 @@
         cursor: cursorColor
       };
       
-      // Create a simplified animation for preview
+      // Create a simplified animation for preview using new design
       let step = 0;
       const totalSteps = 30; // Short preview animation
       const title = messageTitle.textContent;
@@ -2369,81 +2727,86 @@
         ctx.fillStyle = colorOptions.background;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Add border
-        ctx.strokeStyle = colorOptions.border;
-        ctx.lineWidth = Math.max(4, Math.min(canvas.width, canvas.height) * 0.008);
-        const borderOffset = ctx.lineWidth;
-        ctx.strokeRect(borderOffset, borderOffset, canvas.width - (borderOffset * 2), canvas.height - (borderOffset * 2));
+        // Calculate responsive dimensions (same as static)
+        const baseSize = Math.min(canvas.width, canvas.height);
+        const padding = baseSize * 0.08;
+        const cardPadding = baseSize * 0.06;
         
-        // Calculate font sizes - optimized for different aspect ratios
-        const isSquareFormat = Math.abs(canvas.width - canvas.height) < 20; // Check if it's close to square format
-        const aspectRatio = canvas.width / canvas.height;
+        // Draw card with shadow
+        const cardX = padding;
+        const cardY = padding;
+        const cardWidth = canvas.width - (padding * 2);
+        const cardHeight = canvas.height - (padding * 2);
         
-        // Adjust font sizes based on format - smaller fonts for square formats to fit more content
-        let fontMultiplier = isSquareFormat ? 0.045 : 0.055; // Smaller for square formats
-        if (aspectRatio > 1.5) fontMultiplier = 0.06; // Larger for wide formats
+        // Shadow effect
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        ctx.shadowBlur = baseSize * 0.012;
+        ctx.shadowOffsetX = baseSize * 0.004;
+        ctx.shadowOffsetY = baseSize * 0.006;
         
-        const baseFontSize = Math.min(canvas.width, canvas.height) * fontMultiplier;
-        const titleFontSize = baseFontSize * (isSquareFormat ? 1.1 : 1.3); // Smaller title for squares
+        // Card background
+        ctx.fillStyle = colorOptions.background;
+        ctx.fillRect(cardX, cardY, cardWidth, cardHeight);
         
-        // Draw title progressively
-        ctx.fillStyle = colorOptions.text;
-        ctx.font = `bold ${titleFontSize}px Arial, sans-serif`;
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // Typography (matching new design)
+        const titleFontSize = baseSize * 0.055;
+        const contentFontSize = baseSize * 0.032;
+        
+        // Modern font stack
+        const titleFont = `bold ${titleFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+        
+        // Draw title progressively with new styling
+        const charsToShow = Math.floor((step / totalSteps) * shortenedTitle.length);
+        const visibleTitle = shortenedTitle.substring(0, charsToShow);
+        
+        ctx.font = titleFont;
         ctx.textAlign = 'center';
         
-        // Add proper spacing to shortened title
-        let processedTitle = shortenedTitle;
+        // Add accent color for protocol activation
+        if (title.includes('LIFT') || title.includes('PROTOCOL')) {
+          ctx.fillStyle = '#00ff88'; // Neon green accent
+        } else if (title.includes('ZING') || title.includes('ROAST')) {
+          ctx.fillStyle = '#ff4466'; // Neon red accent
+        } else {
+          ctx.fillStyle = colorOptions.text;
+        }
         
-        // If original title has HTML spacing, recreate it in the shortened version
-        const titleHTML = messageTitle.innerHTML;
-        if (titleHTML.includes('<span')) {
-          // Extract name part
-          let namePart = titleHTML.split('<span')[0].trim();
-          // Shorten the name part if needed
-          if (namePart.length > shortenedTitle.length / 2) {
-            namePart = namePart.substring(0, Math.floor(shortenedTitle.length / 2)) + '...';
+        const titleY = cardY + cardPadding + titleFontSize;
+        ctx.fillText(visibleTitle, canvas.width / 2, titleY);
+        
+        // Show blinking cursor at end of title
+        if (step < totalSteps && charsToShow === visibleTitle.length) {
+          const titleWidth = ctx.measureText(visibleTitle).width;
+          const cursorX = (canvas.width / 2) + (titleWidth / 2) + 5;
+          
+          if (Math.floor(step / 3) % 2 === 0) { // Blink every 3 frames
+            ctx.fillStyle = colorOptions.cursor;
+            ctx.fillRect(cursorX, titleY - titleFontSize + 5, 2, titleFontSize - 10);
           }
-          // Get the type part (LIFT or ZING)
-          const typePart = titleHTML.includes('LIFT') ? 'LIFT' : 'ZING';
-          // Create processed title with moderate spacing
-          processedTitle = `${namePart}   ${typePart}`;
         }
         
-        const titleCharsToShow = Math.ceil((step / totalSteps) * processedTitle.length);
-        const partialTitle = processedTitle.substring(0, titleCharsToShow);
-        // Center title vertically with proper margins
-        const titleY = (canvas.height * 0.15) + titleFontSize;
-        ctx.fillText(partialTitle, canvas.width / 2, titleY);
-        
-        // Draw cursor for typewriter effect
-        if (titleCharsToShow < shortenedTitle.length) {
-          const titleWidth = ctx.measureText(partialTitle).width;
-          ctx.fillStyle = colorOptions.cursor;
-          ctx.fillRect(canvas.width / 2 + titleWidth / 2 + 5, titleY - titleFontSize + 15, 3, titleFontSize);
+        // Show preview content text after title finishes
+        if (step > totalSteps * 0.6) {
+          ctx.fillStyle = colorOptions.text;
+          ctx.font = `${contentFontSize}px 'JetBrains Mono', monospace`;
+          ctx.textAlign = 'left';
+          
+          const contentY = titleY + (baseSize * 0.08) + contentFontSize;
+          const contentX = cardX + cardPadding;
+          ctx.fillText('Preview: Your message appears here...', contentX, contentY);
         }
-        
-        // Add preview indicator with better positioning
-        ctx.font = `${titleFontSize * 0.5}px Arial, sans-serif`;
-        ctx.fillStyle = '#666666';
-        const footerY = canvas.height - (canvas.height * 0.05); // Proportional footer positioning
-        
-        // Add subtle divider line for square formats (1:1 ratio)
-        if (Math.abs(canvas.width - canvas.height) < 20) { // Check if it's close to square format
-          ctx.beginPath();
-          ctx.strokeStyle = '#dddddd';
-          ctx.lineWidth = 1;
-          ctx.moveTo(canvas.width * 0.1, footerY - (titleFontSize * 0.5) * 1.5);
-          ctx.lineTo(canvas.width * 0.9, footerY - (titleFontSize * 0.5) * 1.5);
-          ctx.stroke();
-        }
-        
-        ctx.fillText('Preview - Full animation on download', canvas.width / 2, footerY);
         
         step++;
-        if (step < totalSteps) {
-          requestAnimationFrame(drawPreviewFrame);
+        if (step <= totalSteps) {
+          setTimeout(drawPreviewFrame, 100); // 100ms per frame
         } else {
-          // Show download button when preview is complete
+          // Animation complete, hide loading and show download button
           document.getElementById('preview-loading').style.display = 'none';
           document.getElementById('download-content-btn').style.display = 'block';
         }
