@@ -1218,6 +1218,23 @@
     
     /* Door particles container removed */
   </style>
+  <style>
+    /* Prevent form overflow on mobile */
+    @media (max-width: 600px) {
+      #form-container {
+        max-width: 98vw;
+        min-width: 0;
+        overflow-x: auto;
+        padding-bottom: 40px;
+      }
+      .photo-upload-container {
+        margin-bottom: 40px !important;
+      }
+      .intensity-selector, .action-button, #loading {
+        margin-bottom: 20px !important;
+      }
+    }
+  </style>
 </head>
 <body class="home-page">
 
@@ -1605,19 +1622,27 @@
 
     // Photo upload handling functions
     function handlePhotoUpload(event) {
-      const file = event.target.files[0];
-      const preview = document.getElementById('photo-preview');
-      const previewImage = document.getElementById('preview-image');
       const uploadText = document.getElementById('upload-text');
-      
+      const file = event.target.files[0];
       if (file) {
+        uploadText.textContent = '📸 Photo uploaded successfully!';
+        // Show preview
+        const preview = document.getElementById('photo-preview');
+        const img = document.getElementById('preview-image');
+        preview.style.display = 'block';
         const reader = new FileReader();
         reader.onload = function(e) {
-          previewImage.src = e.target.result;
-          preview.style.display = 'block';
-          uploadText.textContent = '📸 Photo uploaded successfully!';
+          img.src = e.target.result;
         };
         reader.readAsDataURL(file);
+        // Scroll form into view for mobile/small screens
+        setTimeout(() => {
+          const form = document.getElementById('form-container');
+          if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 200);
+      } else {
+        uploadText.textContent = '📸 Choose photo to be roasted/uplifted';
+        document.getElementById('photo-preview').style.display = 'none';
       }
     }
 
@@ -2600,7 +2625,14 @@
         ctx.fillStyle = '#ff4466'; // Neon red accent
       }
       
-      ctx.fillText(title, canvas.width / 2, titleY);
+      // Draw title - ensure bold, large, clear
+      ctx.font = `bold ${Math.max(titleFontSize, 48)}px 'Orbitron', 'JetBrains Mono', monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = textColor;
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 8;
+      ctx.fillText(title, width / 2, titleY);
+      ctx.shadowBlur = 0;
       
       // Generous vertical spacing between title and content
       const titleContentGap = baseSize * 0.08; // 8% gap
@@ -3198,7 +3230,8 @@
           mood: keywords,
           intensity: selectedIntensity,
           type: currentType,
-          hasPhoto: photoFile && photoFile.size > 0
+          hasPhoto: photoFile && photoFile.size > 0,
+          photoFile: photoFile // for local fallback
         };
         
         // Call Netlify function - use relative path for development and deployed environments
@@ -3255,6 +3288,9 @@
         submitBtn.disabled = false;
         submitBtn.style.opacity = "1";
       }
+      
+      // Save last form data for retry
+      window.lastFormData = { apiUrl, requestData };
     }
     
     function showLoadingState() {
@@ -3304,6 +3340,47 @@
       messageTitle.innerHTML = title;
       messageTitle.style.color = 'white';
       messageContent.innerHTML = `<p style="line-height: 1.6; white-space: pre-wrap;">${message}</p>`;
+      
+      // Remove any existing retry button
+      const oldRetry = document.getElementById('retry-btn');
+      if (oldRetry) oldRetry.remove();
+      
+      // Show Try Again button only if message is 'Oops, nothing came through.'
+      if (message.trim() === 'Oops, nothing came through.') {
+        const retryBtn = document.createElement('button');
+        retryBtn.id = 'retry-btn';
+        retryBtn.textContent = 'Try Again';
+        retryBtn.className = 'action-button';
+        retryBtn.style.marginTop = '30px';
+        retryBtn.onclick = function() {
+          // Reuse last form data
+          if (window.lastFormData) {
+            retryBtn.disabled = true;
+            retryBtn.textContent = 'Retrying...';
+            // Show loading
+            messageTitle.innerHTML = 'PROCESSING...';
+            messageContent.innerHTML = `<div style='text-align:center;padding:40px 20px;'><div style='font-size:2rem;margin-bottom:20px;'>⚡</div><div style='font-size:1.2rem;margin-bottom:10px;'>Generating your personalized message...</div></div>`;
+            // Call backend again
+            fetch(window.lastFormData.apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(window.lastFormData.requestData)
+            })
+            .then(r => r.json())
+            .then(data => {
+              if (data.error) {
+                generateLocalMessage(window.lastFormData.requestData.name, window.lastFormData.requestData.gender, window.lastFormData.requestData.mood, window.lastFormData.requestData.intensity, window.lastFormData.requestData.photoFile);
+              } else {
+                displayGeneratedMessage(data.title, data.message);
+              }
+            })
+            .catch(() => {
+              generateLocalMessage(window.lastFormData.requestData.name, window.lastFormData.requestData.gender, window.lastFormData.requestData.mood, window.lastFormData.requestData.intensity, window.lastFormData.requestData.photoFile);
+            });
+          }
+        };
+        messageContent.appendChild(retryBtn);
+      }
     }
     
     function generateLocalMessage(name, gender, keywords, intensity, photoFile) {
@@ -3581,16 +3658,25 @@
     <a href="privacy.html" onclick="closeMenu()">Privacy Policy</a>
     <a href="javascript:void(0)" onclick="openDisclaimerPopup(); closeMenu();">Disclaimer</a>
   </div>
+  <div id="side-menu-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);z-index:9998;"></div>
 
   <script>
     function toggleMenu() {
       const menu = document.getElementById("side-menu");
+      const overlay = document.getElementById("side-menu-overlay");
       menu.classList.toggle("open");
+      if (menu.classList.contains("open")) {
+        overlay.style.display = "block";
+      } else {
+        overlay.style.display = "none";
+      }
     }
     
     function closeMenu() {
       const menu = document.getElementById("side-menu");
+      const overlay = document.getElementById("side-menu-overlay");
       menu.classList.remove("open");
+      overlay.style.display = "none";
     }
     
     function openDisclaimerPopup() {
@@ -3615,6 +3701,16 @@
         document.body.classList.remove('disclaimer-active');
       }
     }
+  </script>
+
+  <!-- Auto-close side menu when clicking overlay -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const overlay = document.getElementById('side-menu-overlay');
+      if (overlay) {
+        overlay.addEventListener('click', closeMenu);
+      }
+    });
   </script>
 
   <!-- Cookie Consent Banner (Home Page Only) -->
