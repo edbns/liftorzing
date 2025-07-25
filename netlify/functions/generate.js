@@ -1,4 +1,4 @@
-// generate.js — Enforces sharper, shorter roast tone for ZINGs
+// generate.js — With custom fallback roast bank
 
 const fetch = require('node-fetch');
 
@@ -51,7 +51,6 @@ exports.handler = async function(event, context) {
 - Keep it real and warm.\n- No more than 4 lines.\n- Friendly, modern tone.\n- Avoid clichés.`;
 
     const prompt = tone === 'Roast' ? roastInstructions : upliftInstructions;
-
     const model = Math.random() > 0.5 ? 'mistralai/mistral-7b-instruct:free' : 'gryphe/mythomax-l2-13b:free';
 
     const response = await fetch(`https://openrouter.ai/api/v1/chat/completions`, {
@@ -75,7 +74,7 @@ exports.handler = async function(event, context) {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        message: message || fallbackMessage(data),
+        message: message || getFallbackRoast(displayName, tone),
         title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
         source: result.id ? 'ai' : 'fallback'
       })
@@ -86,8 +85,24 @@ exports.handler = async function(event, context) {
   }
 };
 
-function fallbackMessage(data) {
-  return `Hey ${data.name || 'there'}, even when things glitch, you're still amazing. Try again in a moment.`;
+function getFallbackRoast(name, tone) {
+  const roasts = [
+    `${name}, you're so confusing even ChatGPT gave up.`,
+    `${name}, you're the plot twist no one asked for.`,
+    `${name}, if awkward were an Olympic sport, you'd be the reigning champ.`,
+    `${name}, your brain has more tabs open than your browser.`,
+    `${name}, you bring big "forgot-my-password-again" energy.`,
+    `${name}, even autocorrect can’t save what you just said.`,
+    `${name}, your vibe is like a cracked phone screen — still functioning but a little off.`
+  ];
+  const lifts = [
+    `Hey ${name}, even when things glitch, you're still amazing. Try again in a moment.`,
+    `${name}, you're stronger than today feels — and tomorrow knows it.`,
+    `You're not stuck, ${name} — you're recharging. And that's okay.`,
+    `Hey ${name}, life hiccups. But you're still the main character.`
+  ];
+  const list = tone === 'Uplift' ? lifts : roasts;
+  return list[Math.floor(Math.random() * list.length)];
 }
 
 function fallback(msg, data, headers) {
@@ -96,9 +111,9 @@ function fallback(msg, data, headers) {
     statusCode: 200,
     headers,
     body: JSON.stringify({
-      message: fallbackMessage(data),
+      message: getFallbackRoast(data?.name || 'there', data?.type === 'positive' ? 'Uplift' : 'Roast'),
       title: data?.type === 'positive' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
       source: 'fallback'
     })
   };
-}
+} 
