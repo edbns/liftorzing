@@ -1,4 +1,3 @@
-
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
@@ -11,11 +10,7 @@ exports.handler = async function(event, context) {
     };
 
     if (event.httpMethod === 'OPTIONS') {
-      return {
-        statusCode: 200,
-        headers,
-        body: ''
-      };
+      return { statusCode: 200, headers, body: '' };
     }
 
     if (event.httpMethod !== 'POST') {
@@ -28,12 +23,12 @@ exports.handler = async function(event, context) {
 
     const data = JSON.parse(event.body || '{}');
     const { name, gender, mood, type, intensity } = data;
-    const userMood = (mood || '').toLowerCase();
     const displayName = name || 'Someone';
-    const tone = type === 'positive' || type === 'lift' ? 'Uplift' : 'Roast';
     const level = intensity || 'medium';
+    const tone = type === 'positive' || type === 'lift' ? 'Uplift' : 'Roast';
+    const userMood = (mood || '').toLowerCase();
 
-    // Check for harmful input
+    // 🚨 Check for harmful input
     const isHarmful = /suicide|kill myself|cutting|self harm|hurt myself|hurt others|end my life|die|kill someone|take my life/i;
     if (isHarmful.test(userMood)) {
       return {
@@ -47,12 +42,21 @@ exports.handler = async function(event, context) {
       };
     }
 
-    const apiToken = process.env.HUGGINGFACE_API_TOKEN;
-    if (!apiToken) {
-      console.log('API token missing, using fallback message generation');
+    // ✅ OpenRouter API
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      console.log('Missing OpenRouter API key.');
       return generateFallbackResponse(data, headers);
     }
 
+    // 🎲 Randomly select a model
+    const models = [
+      'mistralai/mistral-7b-instruct:free',
+      'gryphe/mythomax-l2-13b:free'
+    ];
+    const selectedModel = models[Math.floor(Math.random() * models.length)];
+
+    // ✨ Add flavor prompt
     const flavors = [
       "Make it clever, short, and entertaining — avoid clichés.",
       "Use a light poetic tone — keep it uplifting and expressive.",
@@ -64,65 +68,65 @@ exports.handler = async function(event, context) {
 
     const prompt = `Your task is to write a short, creative message for a personality generator app.\n\nThe user’s name is: ${displayName}${gender ? ` (${gender})` : ''}\nTone: ${tone}\nMood description: "${mood || 'unknown mood'}"\nIntensity: ${level}\n\n${flavor}`;
 
-    let response;
-    try {
-      response = await fetch(`https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1`, {
-        headers: {
-          'Authorization': `Bearer ${apiToken}`,
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            temperature: 0.9,
-            max_new_tokens: 100
+    // 🔥 Make request to OpenRouter
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://liftorzing.com',
+        'X-Title': 'LiftorZing'
+      },
+      body: JSON.stringify({
+        model: selectedModel,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a creative, funny, supportive assistant generating personalized roast or uplifting messages for users.'
+          },
+          {
+            role: 'user',
+            content: prompt
           }
-        })
-      });
+        ],
+        temperature: 0.9,
+        max_tokens: 100
+      })
+    });
 
-      if (!response.ok) {
-        console.log(`Hugging Face API error: ${response.status}`);
-        return generateFallbackResponse(data, headers);
-      }
-    } catch (fetchError) {
-      console.log('Fetch error:', fetchError.message);
+    if (!response.ok) {
+      console.log(`OpenRouter API error: ${response.status}`);
       return generateFallbackResponse(data, headers);
     }
 
-    try {
-      const result = await response.json();
-      const generated = Array.isArray(result) && result[0]?.generated_text
-        ? result[0].generated_text
-        : result?.generated_text || "Oops, nothing came through.";
+    const result = await response.json();
+    const message =
+      result?.choices?.[0]?.message?.content?.trim() ||
+      'Oops, nothing came through.';
 
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          message: generated,
-          title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
-          source: 'ai'
-        })
-      };
-    } catch (parseError) {
-      console.log('JSON parse error:', parseError.message);
-      return generateFallbackResponse(data, headers);
-    }
-  } catch (error) {
-    console.log('General error:', error.message);
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        message,
+        title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
+        source: selectedModel
+      })
+    };
+  } catch (err) {
+    console.error('General error:', err.message);
     return {
       statusCode: 500,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ error: 'Internal Server Error', details: error.message })
+      body: JSON.stringify({ error: 'Internal Server Error' })
     };
   }
 };
 
-// Basic fallback if API is unavailable
+// 🛟 Fallback response
 function generateFallbackResponse(data, headers) {
   const fallbackMessage = `Hey ${data.name || 'there'}, even when things glitch, you're still amazing. Try again in a moment.`;
   return {
