@@ -226,15 +226,13 @@
       // Hide the message and continue with the terminal animation after 2.5 seconds
       setTimeout(() => {
         surpriseMessage.style.opacity = "0";
-        setTimeout(() => {
-          surpriseMessage.style.display = "none";
-          // Hide/remove any door element before showing the form
-          const door = document.querySelector('.door, .mystery-door, .mystery-door-container');
-          if (door) door.style.display = 'none';
-          output.style.display = "block";
-          startTerminalAnimation();
-        }, 500);
-      }, 2500);
+        surpriseMessage.style.display = "none";
+        // Hide all door-related elements
+        const doors = document.querySelectorAll('.door, .mystery-door, .mystery-door-container');
+        doors.forEach(el => el.style.display = 'none');
+        output.style.display = "block";
+        startTerminalAnimation();
+      }, 500);
     }, 100);
     
     // Terminal animation functions

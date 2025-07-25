@@ -1310,6 +1310,34 @@
       display: block;
     }
   </style>
+  <style>
+    /* ... existing code ...
+    // In showImageOptions, after allowedFormats.forEach, set up the Update Preview button
+    const updatePreviewBtn = document.getElementById('update-preview-btn');
+    if (updatePreviewBtn) {
+      updatePreviewBtn.onclick = function() {
+        if (window.selectedFormat) {
+          previewContainer.style.display = 'block';
+          generatePreviewImage(document.getElementById('preview-canvas'), window.selectedFormat);
+        }
+      };
+    }
+    // ...
+    // Set export format buttons to black with white text
+    const style = document.createElement('style');
+    style.innerHTML = `
+    #image-modal #image-options button {
+      background: #000 !important;
+      color: #fff !important;
+      border: 2px solid #222 !important;
+    }
+    #image-modal #image-options button:hover {
+      background: #222 !important;
+      color: #fff !important;
+      border-color: #fff !important;
+    }
+    // ... existing code ... */
+  </style>
 </head>
 <body class="home-page">
 
@@ -2241,6 +2269,17 @@
       });
       
       modal.style.display = 'flex';
+      
+      // In showImageOptions, after allowedFormats.forEach, set up the Update Preview button
+      const updatePreviewBtn = document.getElementById('update-preview-btn');
+      if (updatePreviewBtn) {
+        updatePreviewBtn.onclick = function() {
+          if (window.selectedFormat) {
+            previewContainer.style.display = 'block';
+            generatePreviewImage(document.getElementById('preview-canvas'), window.selectedFormat);
+          }
+        };
+      }
     }
     
     function closeImageModal() {
@@ -3317,7 +3356,2479 @@
         retryBtn.style.alignItems = 'center';
         retryBtn.style.justifyContent = 'center';
         retryBtn.style.outline = 'none';
-        retryBtn.innerHTML = `<img src='reload.png' alt='Try Again' style='width:48px;height:48px;display:block;margin-bottom:8px;' />`;
+        retryBtn.innerHTML = `<img src='reload.png' alt='Try Again' style='width:48px;height:48px;display:block;margin-bottom:8px;filter:invert(1) brightness(2);' />`;
+        // Label
+        const label = document.createElement('div');
+        label.textContent = 'Try Again';
+        label.style.color = 'white';
+        label.style.fontFamily = "'JetBrains Mono', monospace";
+        label.style.fontSize = '1.1rem';
+        label.style.marginTop = '2px';
+        label.style.letterSpacing = '1px';
+        label.style.textAlign = 'center';
+        retryDiv.appendChild(retryBtn);
+        retryDiv.appendChild(label);
+        retryBtn.onclick = function() {
+          if (window.lastFormData) {
+            retryBtn.disabled = true;
+            retryBtn.style.opacity = '0.6';
+            label.textContent = 'Retrying...';
+            messageTitle.innerHTML = 'PROCESSING...';
+            messageContent.innerHTML = `<div style='text-align:center;padding:40px 20px;'><div style='font-size:2rem;margin-bottom:20px;'>⚡</div><div style='font-size:1.2rem;margin-bottom:10px;'>Generating your personalized message...</div></div>`;
+            fetch(window.lastFormData.apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(window.lastFormData.requestData)
+            })
+            .then(response => {
+              if (!response.ok) throw new Error('API error');
+              return response.json();
+            })
+            .then(data => {
+              if (data.error) {
+                generateLocalMessage(window.lastFormData.requestData.name, window.lastFormData.requestData.gender, window.lastFormData.requestData.mood, window.lastFormData.requestData.intensity, window.lastFormData.requestData.photoFile);
+              } else {
+                displayGeneratedMessage(data.title, data.message);
+              }
+            })
+            .catch(() => {
+              generateLocalMessage(window.lastFormData.requestData.name, window.lastFormData.requestData.gender, window.lastFormData.requestData.mood, window.lastFormData.requestData.intensity, window.lastFormData.requestData.photoFile);
+            });
+          }
+        };
+        messageContent.appendChild(retryDiv);
+      }
+    }
+    
+    function generateLocalMessage(name, gender, keywords, intensity, photoFile) {
+      // Fallback to local generation when API is unavailable
+      if (currentType === 'positive') {
+        generatePositiveMessage(name, gender, keywords, intensity, photoFile);
+      } else {
+        generateFunnyMessage(name, gender, keywords, intensity, photoFile);
+      }
+    }
+    
+    function generatePositiveMessage(name, gender, keywords, intensity, photoFile = null) {
+      // Set title with padding before and after the name to create spacing
+      const nameText = `${name}'s`;
+      // Add moderate spacing between name and LIFT
+      messageTitle.innerHTML = `${nameText} <span style="display:inline-block; width:20px;"></span>LIFT`;
+      messageTitle.style.color = 'white';
+      
+      // Add additional spacing in the title element
+      messageTitle.style.letterSpacing = "2px";
+      
+      // Check if photo was uploaded for additional personalization
+      const hasPhoto = photoFile && photoFile.size > 0;
+      
+      // Enhanced keyword analysis with context and synonyms
+      const keywordsList = keywords.toLowerCase().split(/[.,;:\s]+/);
+      const analysisResult = analyzeKeywordsAdvanced(keywordsList);
+      
+      // Extract themes from advanced analysis
+      const hasStress = analysisResult.stress > 0;
+      const hasSadness = analysisResult.sadness > 0;
+      const hasTired = analysisResult.fatigue > 0;
+      const hasSuccess = analysisResult.success > 0;
+      const hasHealth = analysisResult.health > 0;
+      const hasChange = analysisResult.change > 0;
+      const hasCreativity = analysisResult.creativity > 0;
+      const hasRelationship = analysisResult.relationship > 0;
+      
+      // Enhanced intensity modifiers with personality types
+      const intensityModifiers = {
+        mild: { 
+          tone: 'gentle', 
+          power: 'soft encouragement',
+          style: 'warm and nurturing',
+          prefix: ['Hey there', 'Hello beautiful soul', 'Dear friend'],
+          energy: 'calm'
+        },
+        medium: { 
+          tone: 'motivational', 
+          power: 'strong conviction',
+          style: 'confident and inspiring',
+          prefix: ['Listen up', 'Here\'s the truth', 'Pay attention'],
+          energy: 'balanced'
+        },
+        intense: { 
+          tone: 'fierce', 
+          power: 'unstoppable force',
+          style: 'powerful and commanding',
+          prefix: ['LISTEN CAREFULLY', 'THE UNIVERSE DEMANDS', 'WAKE UP'],
+          energy: 'explosive'
+        }
+      };
+      
+      // Get the modifier and random prefix before using them
+      const modifier = intensityModifiers[intensity];
+      const randomPrefix = modifier.prefix[Math.floor(Math.random() * modifier.prefix.length)];
+      
+      // Dynamic message parts with personality
+      let intro = `${randomPrefix}, ${name}!`;
+      let body = '';
+      let conclusion = '';
+      let personalityQuirk = getPersonalityQuirk(intensity, hasPhoto);
+      
+      // Add photo-specific elements to the message if photo was uploaded
+      let photoElement = '';
+      if (hasPhoto) {
+        photoElement = currentType === 'positive' ? 
+          `\n\nP.S. That photo you shared shows someone who radiates inner strength and beauty. The camera captured more than just your image - it captured the spirit of someone truly special.` :
+          `\n\nP.S. Thanks for the photo! It's giving us some serious material to work with... 😏`;
+      }
+      
+      // Enhanced message generation with multiple templates
+      const messageTemplates = getEnhancedLiftTemplates(name, intensity, analysisResult);
+      
+      // Customize message based on primary theme and intensity
+      if (hasSuccess) {
+        body = selectRandomTemplate(messageTemplates.success, intensity);
+      } else if (hasStress) {
+        body = selectRandomTemplate(messageTemplates.stress, intensity);
+      } else if (hasSadness) {
+        body = selectRandomTemplate(messageTemplates.sadness, intensity);
+      } else if (hasHealth) {
+        body = selectRandomTemplate(messageTemplates.health, intensity);
+      } else if (hasChange) {
+        body = selectRandomTemplate(messageTemplates.change, intensity);
+      } else if (hasCreativity) {
+        body = selectRandomTemplate(messageTemplates.creativity, intensity);
+      } else if (hasRelationship) {
+        body = selectRandomTemplate(messageTemplates.relationship, intensity);
+      } else {
+        body = selectRandomTemplate(messageTemplates.general, intensity);
+      }
+      
+      // Dynamic conclusion with personality
+      const conclusions = {
+        intense: [
+          `You are unstoppable, ${name}. The universe is conspiring in your favor!`,
+          `${name}, you're not just surviving - you're THRIVING! Own your power!`,
+          `The world needs your unique magic, ${name}. Step into your greatness!`
+        ],
+        medium: [
+          `Remember, this moment is just that – a moment. You've got this, ${name}!`,
+          `Tomorrow brings new possibilities and a fresh start. Keep going!`,
+          `You're stronger than you know and more capable than you believe.`
+        ],
+        mild: [
+          `Take things one step at a time, ${name}. You're doing great.`,
+          `Remember that tomorrow is a new day with new opportunities.`,
+          `Be gentle with yourself. You deserve kindness and patience.`
+        ]
+      };
+      
+      conclusion = conclusions[intensity][Math.floor(Math.random() * conclusions[intensity].length)];
+      
+      // Construct final message with enhanced formatting
+      const fullMessage = `${intro}\n\n${body}\n\n${conclusion}${personalityQuirk}${photoElement}`;
+      messageContent.textContent = fullMessage;
+      messageContent.style.background = 'linear-gradient(135deg, rgba(0, 255, 0, 0.05), rgba(0, 255, 0, 0.1))';
+      messageContent.style.borderLeft = '4px solid #00ff00';
+      messageContent.style.borderRight = '1px solid rgba(0, 255, 0, 0.3)';
+      messageContent.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.1)';
+      messageContent.style.animation = 'liftGlow 3s ease-in-out infinite';
+      messageContent.style.fontFamily = "'JetBrains Mono', monospace";
+      messageContent.style.fontSize = '0.95em';
+      messageContent.style.lineHeight = '1.8';
+    }
+    
+    function generateFunnyMessage(name, gender, keywords, intensity, photoFile = null) {
+      // Set title with padding before and after the name to create spacing
+      const nameText = `${name}'s`;
+      // Add moderate spacing between name and ZING
+      messageTitle.innerHTML = `${nameText} <span style="display:inline-block; width:20px;"></span>ZING`;
+      messageTitle.style.color = 'white';
+      
+      // Add additional spacing in the title element
+      messageTitle.style.letterSpacing = "2px";
+      
+      // Check if photo was uploaded for additional personalization
+      const hasPhoto = photoFile && photoFile.size > 0;
+      
+      // Enhanced keyword analysis for roasting
+      const keywordsList = keywords.toLowerCase().split(/[.,;:\s]+/);
+      const roastAnalysis = analyzeKeywordsForRoasting(keywordsList);
+      
+      // Extract themes from analysis
+      const hasWork = roastAnalysis.work > 0;
+      const hasFamily = roastAnalysis.family > 0;
+      const hasDating = roastAnalysis.dating > 0;
+      const hasMoney = roastAnalysis.money > 0;
+      const hasFitness = roastAnalysis.fitness > 0;
+      const hasSocial = roastAnalysis.social > 0;
+      const hasTechnology = roastAnalysis.technology > 0;
+      const hasFood = roastAnalysis.food > 0;
+      
+      // Dynamic roast intros with personality
+      const roastIntros = {
+        intense: [`OH ${name.toUpperCase()}`, `WELL WELL WELL, ${name}`, `BUCKLE UP ${name.toUpperCase()}`],
+        medium: [`Oh ${name}`, `Listen here, ${name}`, `Well ${name}`],
+        mild: [`Hey ${name}`, `So ${name}`, `Alright ${name}`]
+      };
+      
+      let intro = roastIntros[intensity][Math.floor(Math.random() * roastIntros[intensity].length)] + ',';
+      let body = '';
+      let conclusion = '';
+      let roastPersonality = getRoastPersonality(intensity, hasPhoto);
+      
+      // Add photo-specific roasting elements if photo was uploaded
+      let photoRoast = '';
+      if (hasPhoto) {
+        photoRoast = intensity === 'intense' ? 
+          `\n\nAnd that photo you uploaded? Bold choice! You really said "let me give this AI some visual evidence to work with." The confidence is admirable, the judgment... questionable. But hey, at least now we know what we're working with! 📸💅` :
+          intensity === 'medium' ?
+          `\n\nP.S. Thanks for the photo! Now we have visual confirmation of what we're dealing with here. The camera adds 10 pounds, but apparently it also adds 10 years of questionable life choices! 😂` :
+          `\n\nP.S. That photo you shared? Well... the camera never lies, but maybe it should have made an exception just this once! 😅`;
+      }
+      
+      // Enhanced roast templates with multiple variations
+      const roastTemplates = getEnhancedRoastTemplates(name, intensity, roastAnalysis);
+      
+      // Select roast based on primary theme
+      if (hasWork) {
+        body = selectRandomTemplate(roastTemplates.work, intensity);
+      } else if (hasFamily) {
+        body = selectRandomTemplate(roastTemplates.family, intensity);
+      } else if (hasDating) {
+        body = selectRandomTemplate(roastTemplates.dating, intensity);
+      } else if (hasMoney) {
+        body = selectRandomTemplate(roastTemplates.money, intensity);
+      } else if (hasFitness) {
+        body = selectRandomTemplate(roastTemplates.fitness, intensity);
+      } else if (hasSocial) {
+        body = selectRandomTemplate(roastTemplates.social, intensity);
+      } else if (hasTechnology) {
+        body = selectRandomTemplate(roastTemplates.technology, intensity);
+      } else if (hasFood) {
+        body = selectRandomTemplate(roastTemplates.food, intensity);
+      } else {
+        body = selectRandomTemplate(roastTemplates.general, intensity);
+      }
+      
+      // Dynamic roast conclusions
+      const roastConclusions = {
+        intense: [
+          `But hey, at least you're self-aware enough to seek validation from an AI. That's... progress?`,
+          `Welcome to rock bottom - the view is terrible but at least you have Wi-Fi!`,
+          `Your life is like a sitcom, except nobody's laughing and it got cancelled!`
+        ],
+        medium: [
+          `Don't take life too seriously. After all, nobody makes it out alive anyway!`,
+          `At least you're consistently providing entertainment for the rest of us!`,
+          `Your life choices are questionable, but your commitment to them is admirable!`
+        ],
+        mild: [
+          `But hey, at least you have a sense of humor about it!`,
+          `Life's too short to take yourself seriously all the time!`,
+          `You're doing fine, just... maybe reconsider a few things!`
+        ]
+      };
+      
+      conclusion = roastConclusions[intensity][Math.floor(Math.random() * roastConclusions[intensity].length)];
+        `Remember, if you can laugh at yourself, you'll never run out of entertainment!`;
+      
+      // Construct final message with enhanced formatting
+      const fullMessage = `${intro}\n\n${body}\n\n${conclusion}${roastPersonality}${photoRoast}`;
+      messageContent.textContent = fullMessage;
+      messageContent.style.background = 'linear-gradient(135deg, rgba(255, 0, 0, 0.05), rgba(255, 0, 0, 0.1))';
+      messageContent.style.borderLeft = '4px solid #ff0000';
+      messageContent.style.borderRight = '1px solid rgba(255, 0, 0, 0.3)';
+      messageContent.style.boxShadow = '0 0 20px rgba(255, 0, 0, 0.1)';
+      messageContent.style.animation = 'zingGlow 3s ease-in-out infinite';
+      messageContent.style.fontFamily = "'JetBrains Mono', monospace";
+      messageContent.style.fontSize = '0.95em';
+      messageContent.style.lineHeight = '1.8';
+    }
+  </script>
+
+  <!-- Disclaimer Popup Modal -->
+  <div id="disclaimer-popup" class="disclaimer-modal" style="display:none;">
+    <div class="container" style="background: #000; color: #fff; padding: 40px 20px; max-width: 800px; margin: 40px auto; border-radius: 12px; position: relative; font-family: 'JetBrains Mono', monospace; overflow-y: auto; max-height: 80vh;">
+      <span class="disclaimer-close" onclick="closeDisclaimerPopup()" style="position: absolute; top: 20px; right: 20px; color: #fff; font-size: 2rem; cursor: pointer;">&times;</span>
+      <h1 style="font-family: 'Orbitron', monospace; color: #fff; font-size: 2.5em; margin-bottom: 20px; text-align: center; text-transform: uppercase; letter-spacing: 2px;">Disclaimer</h1>
+      <p><strong>Effective Date:</strong> July 22, 2025</p>
+      <p>Welcome to <strong>Lift or Zing™</strong> (https://liftorzing.com), a website created to entertain, uplift, or playfully roast users based on their selected mood.</p>
+      <h2 style="font-family: 'Orbitron', monospace; color: #fff; font-size: 1.4em; margin: 30px 0 15px 0; border-left: 4px solid #fff; padding-left: 15px;">1. Entertainment Purposes Only</h2>
+      <p>All content, including messages, roasts, and quotes, are generated for entertainment purposes only and should not be considered personal, medical, or professional advice.</p>
+      <h2 style="font-family: 'Orbitron', monospace; color: #fff; font-size: 1.4em; margin: 30px 0 15px 0; border-left: 4px solid #fff; padding-left: 15px;">2. AI-Generated Responses</h2>
+      <p>Lift or Zing™ responses are automatically generated by AI. We cannot guarantee their accuracy, appropriateness, or relevance. Use discretion when interpreting content.</p>
+      <h2 style="font-family: 'Orbitron', monospace; color: #fff; font-size: 1.4em; margin: 30px 0 15px 0; border-left: 4px solid #fff; padding-left: 15px;">3. Humor & Sensitivity</h2>
+      <p>Zing responses are designed to be funny, sarcastic, or edgy. If you are sensitive to this type of humor, we recommend sticking to the Lift side of the experience.</p>
+      <h2 style="font-family: 'Orbitron', monospace; color: #fff; font-size: 1.4em; margin: 30px 0 15px 0; border-left: 4px solid #fff; padding-left: 15px;">4. Uploaded Content</h2>
+      <p>Any uploaded content is processed only to deliver AI responses and is not saved or shared by Lift or Zing™. You are responsible for what you upload.</p>
+      <h2 style="font-family: 'Orbitron', monospace; color: #fff; font-size: 1.4em; margin: 30px 0 15px 0; border-left: 4px solid #fff; padding-left: 15px;">5. No Liability</h2>
+      <p>Lift or Zing™ and its creators shall not be held liable for any emotional, mental, or social impact resulting from the use of this website.</p>
+      <h2 style="font-family: 'Orbitron', monospace; color: #fff; font-size: 1.4em; margin: 30px 0 15px 0; border-left: 4px solid #fff; padding-left: 15px;">6. Contact</h2>
+      <p>If you have questions about this disclaimer, email us at <a href="mailto:pickaside@liftorzing.com" style="color: #fff; border-bottom: 1px solid #fff;">pickaside@liftorzing.com</a></p>
+    </div>
+  </div>
+
+  <!-- Menu Toggle Button -->
+  <button id="menu-toggle-btn" onclick="toggleMenu()" class="home-only">☰</button>
+
+  <!-- Side Menu -->
+  <div id="side-menu" class="home-only">
+    <a href="tos.html" onclick="closeMenu()">Terms of Service</a>
+    <a href="privacy.html" onclick="closeMenu()">Privacy Policy</a>
+    <a href="javascript:void(0)" onclick="openDisclaimerPopup(); closeMenu();">Disclaimer</a>
+  </div>
+  <div id="side-menu-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);z-index:9998;"></div>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById("side-menu");
+      const overlay = document.getElementById("side-menu-overlay");
+      menu.classList.toggle("open");
+      if (menu.classList.contains("open")) {
+        overlay.style.display = "block";
+      } else {
+        overlay.style.display = "none";
+      }
+    }
+    
+    function closeMenu() {
+      const menu = document.getElementById("side-menu");
+      const overlay = document.getElementById("side-menu-overlay");
+      menu.classList.remove("open");
+      overlay.style.display = "none";
+    }
+    
+    function openDisclaimerPopup() {
+      // When opening the disclaimer popup on any page, temporarily hide it from home-page class control
+      // to allow it to display properly while popup is active
+      document.body.classList.add('disclaimer-active');
+      document.getElementById('disclaimer-popup').style.display = 'block';
+    }
+
+    function closeDisclaimerPopup() {
+      document.getElementById('disclaimer-popup').style.display = 'none';
+      // After closing the popup, remove the temporary class
+      document.body.classList.remove('disclaimer-active');
+    }
+
+    // Close popup when clicking outside of it
+    window.onclick = function(event) {
+      const popup = document.getElementById('disclaimer-popup');
+      if (event.target == popup) {
+        popup.style.display = 'none';
+        // Also remove the temporary class when clicking outside
+        document.body.classList.remove('disclaimer-active');
+      }
+    }
+  </script>
+
+  <!-- Auto-close side menu when clicking overlay -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const overlay = document.getElementById('side-menu-overlay');
+      if (overlay) {
+        overlay.addEventListener('click', closeMenu);
+      }
+    });
+  </script>
+
+  <!-- Cookie Consent Banner (Home Page Only) -->
+  <div id="cookie-consent-banner" style="
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: #ffffff;
+    color: #000000;
+    padding: 1rem 1.5rem;
+    border: 2px solid #000000;
+    border-radius: 0;
+    font-family: 'JetBrains Mono', monospace;
+    z-index: 1000;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  ">
+    <div style="flex: 1; margin-right: 1rem;">
+      We use cookies to improve your experience. By using Lift or Zing™, you agree to our
+      <a href="/privacy.html" style="color: #000000; text-decoration: underline;">Privacy Policy</a>.
+    </div>
+    <button onclick="acceptCookies()" style="
+      background: #000000;
+      border: 2px solid #000000;
+      color: #ffffff;
+      padding: 0.5rem 1rem;
+      border-radius: 0;
+      cursor: pointer;
+      font-weight: bold;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.3s ease;
+    " onmouseover="this.style.background='#ffffff'; this.style.color='#000000';" onmouseout="this.style.background='#000000'; this.style.color='#ffffff';">Got it!</button>
+  </div>
+
+  <script>
+    function acceptCookies() {
+      localStorage.setItem("liftorzing_cookies_accepted", "true");
+      document.getElementById("cookie-consent-banner").style.display = "none";
+    }
+
+    window.addEventListener("load", function () {
+      // Only show cookie banner on home page and if not already accepted
+      if (document.body.classList.contains('home-page') && !localStorage.getItem("liftorzing_cookies_accepted")) {
+        document.getElementById("cookie-consent-banner").style.display = "flex";
+      }
+      
+
+    });
+  </script>
+
+  <style>
+    /* ... existing code ...
+    // In showImageOptions, after allowedFormats.forEach, set up the Update Preview button
+    const updatePreviewBtn = document.getElementById('update-preview-btn');
+    if (updatePreviewBtn) {
+      updatePreviewBtn.onclick = function() {
+        if (window.selectedFormat) {
+          previewContainer.style.display = 'block';
+          generatePreviewImage(document.getElementById('preview-canvas'), window.selectedFormat);
+        }
+      };
+    }
+    // ...
+    // Set export format buttons to black with white text
+    const style = document.createElement('style');
+    style.innerHTML = `
+    #image-modal #image-options button {
+      background: #000 !important;
+      color: #fff !important;
+      border: 2px solid #222 !important;
+    }
+    #image-modal #image-options button:hover {
+      background: #222 !important;
+      color: #fff !important;
+      border-color: #fff !important;
+    }
+    // ... existing code ... */
+  </style>
+</head>
+<body class="home-page">
+
+  
+  <div id="container">
+    <div class="mystery-door-container">
+      <!-- Mystery Door -->
+      <a href="transition.html" style="text-decoration: none;">
+        <div class="mystery-door">
+          <div class="door-text">VIBE</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+
+
+  <div id="message-container" class="centered">
+    <button class="close-btn" onclick="closeMessage()">×</button>
+    <h2 id="message-title" style="font-family: 'Orbitron', monospace; color: white; margin-bottom: 60px; display: flex; justify-content: center; align-items: center; text-transform: uppercase; letter-spacing: 2px;"></h2>
+    <div id="message-content" style="font-family: 'JetBrains Mono', monospace; margin: 40px 0; line-height: 1.6; text-align: left; padding: 30px 20px; border-radius: 0px; background: rgba(0,0,0,0.05); position: relative; letter-spacing: 0.5px;"></div>
+    <div class="share-container">
+      <button id="main-share-button" class="main-share-btn" aria-label="Share">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="18" cy="5" r="3"></circle>
+          <circle cx="6" cy="12" r="3"></circle>
+          <circle cx="18" cy="19" r="3"></circle>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+        </svg>
+      </button>
+      
+      <!-- Share Menu Overlay (mobile) -->
+      <div id="share-menu-overlay" class="share-menu-overlay"></div>
+      
+      <!-- Share Menu (Both Mobile & Desktop) -->
+      <div id="share-menu" class="share-menu">
+        <div class="share-menu-content">
+          <!-- Close button for mobile menu -->
+          <button id="close-share-menu" class="close-share-menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          
+          <!-- Share Menu Title (Mobile only) -->
+          <div class="share-menu-title">Share</div>
+          
+          <!-- Share Options -->
+          <div class="share-buttons-grid">
+            <button class="share-menu-btn copy" onclick="copyMessage()" aria-label="Copy to clipboard">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+            <button class="share-menu-btn instagram" onclick="showImageOptions('instagram')" aria-label="Share on Instagram">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn twitter" onclick="showImageOptions('twitter')" aria-label="Share on Twitter/X">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn whatsapp" onclick="showImageOptions('whatsapp')" aria-label="Share on WhatsApp">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.488"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn telegram" onclick="showImageOptions('telegram')" aria-label="Share on Telegram">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn facebook" onclick="showImageOptions('facebook')" aria-label="Share on Facebook">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn reddit" onclick="showImageOptions('reddit')" aria-label="Share on Reddit">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+              </svg>
+            </button>
+            <button class="share-menu-btn download" onclick="downloadMessage()" aria-label="Save message">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7,10 12,15 17,10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Image Options Modal -->
+    <div id="image-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+      <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; font-family: 'JetBrains Mono', monospace; max-height: 90vh; overflow-y: auto;">
+        <h3 style="margin: 0 0 20px 0; font-family: 'Orbitron', monospace; color: black;" id="modal-title">Choose Image Format</h3>
+        <div id="format-type-selector" style="margin-bottom: 20px;">
+          <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="static-btn" onclick="setFormatType('static')" style="padding: 8px 16px; background: black; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'JetBrains Mono', monospace;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21,15 16,10 5,21"></polyline>
+              </svg>
+              Static Image
+            </button>
+          </div>
+        </div>
+        
+        <!-- Preview section -->
+        <div id="preview-container" style="display: none; margin: 20px 0; text-align: center;">
+          <h4 style="font-family: 'Orbitron', monospace; margin: 0 0 10px 0;">Preview</h4>
+          <div style="position: relative; display: inline-block; margin: 0 auto;">
+            <canvas id="preview-canvas" style="max-width: 100%;"></canvas>
+            <div id="preview-loading" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.8);">
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 14px;">Generating preview...</div>
+            </div>
+          </div>
+          <div style="margin-top: 10px;"></div>
+          
+          <!-- Color customization -->
+          <div id="color-options" style="margin-top: 15px; padding: 15px; background: #f8f8f8; border-radius: 8px;">
+            <h4 style="font-family: 'Orbitron', monospace; margin: 0 0 10px 0; color: #000;">Customize Colors</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 5px; color: #000;">Background</label>
+                <input type="color" id="bg-color" value="#ffffff" style="width: 100%; height: 30px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 5px; color: #000;">Text</label>
+                <input type="color" id="text-color" value="#000000" style="width: 100%; height: 30px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 5px; color: #000;">Border</label>
+                <input type="color" id="border-color" value="#000000" style="width: 100%; height: 30px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 5px; color: #000;">Cursor</label>
+                <input type="color" id="cursor-color" value="#000000" style="width: 100%; height: 30px;">
+              </div>
+            </div>
+            <button id="update-preview-btn" style="margin-top: 10px; background: black; color: white; padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; font-family: 'JetBrains Mono', monospace; width: 100%;">Update Preview</button>
+          </div>
+        </div>
+        
+        <div id="image-options" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Options will be populated dynamically -->
+        </div>
+        <button onclick="closeImageModal()" style="margin-top: 20px; padding: 10px 20px; background: black; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'JetBrains Mono', monospace;">Close</button>
+      </div>
+    </div>
+    <button class="action-button" onclick="closeMessage()">BACK TO DOOR</button>
+  </div>
+
+  <div id="overlay">
+    <div id="typing-output"></div>
+    <span id="cursor"></span>
+  </div>
+  
+  <div id="form-container" class="centered">
+    <button class="close-btn" onclick="closeForm()">×</button>
+    <h2 style="font-family: 'Orbitron', monospace; color: white; text-transform: uppercase; letter-spacing: 2px;">[ SYSTEM INTERFACE ]</h2>
+    <p style="max-width: 400px; margin: 10px auto; color: white; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px;">Initialize personality boost protocol...</p>
+    <form id="mood-form" onsubmit="generateMessage(event)">
+      <label style="color: white;">Your Name:</label>
+      <input type="text" name="name" required>
+      <label style="color: white;">Gender (optional):</label>
+      <select name="gender" required>
+        <option value="">Select...</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="prefer_not_to_say">Prefer not to say</option>
+      </select>
+      
+      <!-- Input Method Choice -->
+      <div class="input-method-section">
+        <label style="display: block; margin: 20px 0 15px 0; font-weight: bold; color: white;">Choose Your Input Method:</label>
+        <div class="input-method-toggle">
+          <button type="button" class="method-btn active" id="text-method-btn" onclick="switchInputMethod('text')">
+            Describe Your Mood
+          </button>
+          <button type="button" class="method-btn" id="photo-method-btn" onclick="switchInputMethod('photo')">
+            Upload Photo
+          </button>
+        </div>
+      </div>
+
+      <!-- Text Input Section -->
+      <div id="text-input-section" class="input-section">
+        <label style="color: white;">Describe your day or mood:</label>
+        <textarea name="keywords" id="keywords-textarea" rows="4" placeholder="Enter your current state..."></textarea>
+      </div>
+
+      <!-- Photo Input Section -->
+      <div id="photo-input-section" class="input-section" style="display: none;">
+        <label style="color: white;">Upload Your Photo:</label>
+        <div class="photo-upload-container" style="margin-bottom: 80px;">
+          <input type="file" id="photo-upload" name="photo" accept="image/*" onchange="handlePhotoUpload(event)">
+          <label for="photo-upload" class="photo-upload-label">
+            <span id="upload-text" style="color: white;">📸 Choose photo to be roasted/uplifted</span>
+          </label>
+          <div id="photo-preview" style="display: none; margin-top: 15px; text-align: center;">
+            <img id="preview-image" style="max-width: 200px; max-height: 200px; border-radius: 0px; margin-top: 10px; border: 2px solid #666;">
+            <div style="margin-top: 10px;">
+              <button type="button" onclick="removePhoto()" style="padding: 8px 15px; background: #444; color: white; border: 1px solid #666; border-radius: 0px; font-size: 14px;">Remove Photo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="intensity-selector">
+        <label style="display: block; margin-bottom: 10px; font-size: 0.9rem; color: white;">Intensity Level:</label>
+        <button type="button" class="intensity-btn active" data-intensity="mild" onclick="setIntensity('mild')">Mild</button>
+        <button type="button" class="intensity-btn" data-intensity="medium" onclick="setIntensity('medium')">Medium</button>
+        <button type="button" class="intensity-btn" data-intensity="intense" onclick="setIntensity('intense')">Intense</button>
+      </div>
+      <button type="submit" class="action-button" id="submit-btn">Generate Message</button>
+      
+      <!-- Spinner -->
+      <div id="loading" style="display: none; margin-top: 20px; text-align: center; color: white;">
+        <div class="spinner" style="display: inline-block; width: 24px; height: 24px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: white; animation: spin 1s ease-in-out infinite;"></div>
+        <div style="margin-top: 10px;">Generating message…</div>
+      </div>
+      
+      <style>
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      </style>
+    </form>
+  </div>
+
+  <script>
+    // Share Menu Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const mainShareButton = document.getElementById('main-share-button');
+      const shareMenu = document.getElementById('share-menu');
+      const shareMenuOverlay = document.getElementById('share-menu-overlay');
+      const closeShareMenuBtn = document.getElementById('close-share-menu');
+      
+      // Toggle share menu
+      function toggleShareMenu() {
+        if (shareMenu.classList.contains('active')) {
+          closeShareMenu();
+        } else {
+          openShareMenu();
+        }
+      }
+      
+      // Open share menu
+      function openShareMenu() {
+        // Display menu and overlay before adding active class for transition
+        shareMenu.style.display = 'block';
+        shareMenuOverlay.style.display = 'block';
+        
+        // Force reflow
+        void shareMenu.offsetWidth;
+        
+        // Add active classes
+        shareMenu.classList.add('active');
+        shareMenuOverlay.classList.add('active');
+        shareMenuOverlay.style.opacity = '1';
+        
+        // Detect if mobile for different behavior
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          document.body.style.overflow = 'hidden'; // Prevent body scrolling on mobile
+        }
+      }
+      
+      // Close share menu
+      function closeShareMenu() {
+        shareMenu.classList.remove('active');
+        shareMenuOverlay.style.opacity = '0';
+        
+        // Wait for transition to complete before hiding elements
+        setTimeout(() => {
+          shareMenu.style.display = 'none';
+          shareMenuOverlay.style.display = 'none';
+          document.body.style.overflow = ''; // Restore body scrolling
+        }, 300);
+      }
+      
+      // Event listeners
+      mainShareButton.addEventListener('click', toggleShareMenu);
+      closeShareMenuBtn.addEventListener('click', closeShareMenu);
+      shareMenuOverlay.addEventListener('click', closeShareMenu);
+      
+      // Close on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && shareMenu.classList.contains('active')) {
+          closeShareMenu();
+        }
+      });
+    });
+    
+    // Check URL parameters on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Option 2: Use sessionStorage for form state
+      const showForm = sessionStorage.getItem('showForm');
+      const formType = sessionStorage.getItem('formType');
+      if (showForm === 'true' && (formType === 'lift' || formType === 'zing')) {
+        document.getElementById('container').style.display = 'none';
+        currentType = formType === 'lift' ? 'positive' : 'funny';
+        formContainer.style.display = 'block';
+        document.body.classList.remove('home-page');
+        document.querySelectorAll('.home-only').forEach(element => {
+          element.style.display = 'none';
+        });
+        updateFormForType(currentType);
+        sessionStorage.removeItem('showForm');
+        sessionStorage.removeItem('formType');
+        return;
+      }
+      // (Optional) fallback: legacy query string support (if needed)
+      // ... existing code for query string, or remove if not needed ...
+    });
+    
+    // Audio effects setup
+    // Sound effects removed
+    
+    const typingOutput = document.getElementById('typing-output');
+    const overlay = document.getElementById('overlay');
+    const formContainer = document.getElementById('form-container');
+    const messageContainer = document.getElementById('message-container');
+    const messageTitle = document.getElementById('message-title');
+    const messageContent = document.getElementById('message-content');
+    const cursor = document.getElementById('cursor');
+    const submitBtn = document.getElementById('submit-btn');
+    let currentType = '';
+    let selectedIntensity = 'mild';
+
+    // Input method switching
+    let currentInputMethod = 'text';
+
+    function switchInputMethod(method) {
+      currentInputMethod = method;
+      
+      const textBtn = document.getElementById('text-method-btn');
+      const photoBtn = document.getElementById('photo-method-btn');
+      const textSection = document.getElementById('text-input-section');
+      const photoSection = document.getElementById('photo-input-section');
+      const keywordsTextarea = document.getElementById('keywords-textarea');
+      const photoUpload = document.getElementById('photo-upload');
+      
+      if (method === 'text') {
+        textBtn.classList.add('active');
+        photoBtn.classList.remove('active');
+        textSection.style.display = 'block';
+        photoSection.style.display = 'none';
+        
+        // Make text required, remove photo requirement
+        keywordsTextarea.required = true;
+        photoUpload.required = false;
+        
+        // Clear photo data when switching to text
+        removePhoto();
+      } else {
+        photoBtn.classList.add('active');
+        textBtn.classList.remove('active');
+        photoSection.style.display = 'block';
+        textSection.style.display = 'none';
+        
+        // Make photo required, remove text requirement
+        photoUpload.required = true;
+        keywordsTextarea.required = false;
+        
+        // Clear text data when switching to photo
+        keywordsTextarea.value = '';
+      }
+    }
+
+    // Photo upload handling functions
+    function handlePhotoUpload(event) {
+      const uploadText = document.getElementById('upload-text');
+      const file = event.target.files[0];
+      if (file) {
+        uploadText.textContent = '📸 Photo uploaded successfully!';
+        // Show preview
+        const preview = document.getElementById('photo-preview');
+        const img = document.getElementById('preview-image');
+        preview.style.display = 'block';
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        // Scroll form into view for mobile/small screens
+        setTimeout(() => {
+          const form = document.getElementById('form-container');
+          if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 200);
+      } else {
+        uploadText.textContent = '📸 Choose photo to be roasted/uplifted';
+        document.getElementById('photo-preview').style.display = 'none';
+      }
+    }
+
+    function removePhoto() {
+      const photoUpload = document.getElementById('photo-upload');
+      const preview = document.getElementById('photo-preview');
+      const uploadText = document.getElementById('upload-text');
+      
+      photoUpload.value = '';
+      preview.style.display = 'none';
+      uploadText.textContent = '📸 Choose photo to be roasted/uplifted';
+    }
+
+    function typeLine(text, delay = 30, onComplete = null) {
+      // Reset typing output and make cursor visible
+      typingOutput.textContent = '';
+      cursor.style.display = 'inline-block';
+      
+      // Typing sound removed
+      
+      let i = 0;
+      const typeNextChar = () => {
+        if (i < text.length) {
+          typingOutput.textContent += text.charAt(i);
+          i++;
+          
+          // Blip sound removed
+          
+          // Continue typing
+          setTimeout(typeNextChar, delay);
+        } else {
+          // Stop typing sound when complete
+          soundEffects.typing.stop();
+          
+          if (onComplete) {
+            // Execute callback when typing is complete
+            setTimeout(onComplete, 500);
+          }
+        }
+      };
+      
+      // Start typing
+      typeNextChar();
+    }
+    
+    function startSequence(type) {
+      // Store the type and hide the door container
+      currentType = type;
+      document.getElementById('container').style.display = 'none';
+      
+      // Show the overlay for typing animation
+      overlay.style.display = 'block';
+      
+      // Prepare typing content based on door selection
+      let typingContent = '';
+      if (type === 'positive') {
+        typingContent = "> INITIATING LIFT PROTOCOL...\n> SCANNING EMOTIONAL PATTERNS...\n> PREPARING UPLIFT MODULES...\n> SYSTEM READY FOR INPUT";
+      } else {
+        typingContent = "> INITIATING ZING PROTOCOL...\n> LOADING HUMOR ALGORITHMS...\n> CALIBRATING ROAST INTENSITY...\n> SYSTEM READY FOR INPUT";
+      }
+      
+      // Start typing animation
+      typeLine(typingContent, 30, () => {
+        // When typing is complete, transition to the form
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          formContainer.style.display = 'block';
+          // Logo removed
+          
+          // Hide mobile footer when form is shown
+          document.body.classList.remove('home-page');
+          
+          updateFormForType(type);
+        }, 1000);
+      });
+    }
+
+    function updateFormForType(type) {
+      if (type === 'positive') {
+        submitBtn.textContent = 'UPLIFT MY DAY';
+        submitBtn.className = 'action-button lift';
+        document.body.classList.add('lift-mode');
+        document.body.classList.remove('zing-mode');
+      } else {
+        submitBtn.textContent = 'ROAST AWAY';
+        submitBtn.className = 'action-button zing';
+        document.body.classList.add('zing-mode');
+        document.body.classList.remove('lift-mode');
+      }
+    }
+
+    function closeForm() {
+      // Add fade out animation before hiding
+      formContainer.style.animation = 'fadeIn 0.4s ease forwards reverse';
+      
+      setTimeout(() => {
+        formContainer.style.display = 'none';
+        
+        // Logo removed
+        
+        // Show mobile footer again when returning to home
+        document.body.className = 'home-page';
+        
+        // Show menu elements when returning to home
+        document.querySelectorAll('.home-only').forEach(element => {
+          element.style.display = 'block';
+        });
+        
+        // Reset form
+        document.getElementById('mood-form').reset();
+        submitBtn.textContent = 'Generate Message';
+        submitBtn.className = 'action-button';
+        
+        // Reset typing animation (only if elements exist)
+        if (typingOutput) typingOutput.textContent = '';
+        if (cursor) cursor.style.display = 'inline-block';
+        
+        // Show container with animation
+        const container = document.getElementById('container');
+        container.style.opacity = '0';
+        container.style.display = 'flex';
+        
+        // Force reflow
+        void container.offsetWidth;
+        
+        // Add animation
+        container.style.transition = 'opacity 0.5s ease';
+        container.style.opacity = '1';
+      }, 300);
+    }
+    
+    function closeMessage() {
+      // Add fade out animation before hiding
+      messageContainer.style.animation = 'slideInRight 0.4s ease forwards reverse';
+      
+      setTimeout(() => {
+        messageContainer.style.display = 'none';
+        
+        // Logo removed
+        
+        // Show mobile footer again when returning to home
+        document.body.className = 'home-page';
+        
+        // Show menu elements when returning to home
+        document.querySelectorAll('.home-only').forEach(element => {
+          element.style.display = 'block';
+        });
+        
+        // Show container with animation
+        const container = document.getElementById('container');
+        container.style.opacity = '0';
+        container.style.display = 'flex';
+        
+        // Force reflow
+        void container.offsetWidth;
+        
+        // Add animation
+        container.style.transition = 'opacity 0.5s ease';
+        container.style.opacity = '1';
+      }, 300);
+    }
+    
+    // Enhanced keyword analysis functions
+    function analyzeKeywordsAdvanced(keywordsList) {
+      const themes = {
+        stress: 0, sadness: 0, fatigue: 0, success: 0, health: 0, 
+        change: 0, creativity: 0, relationship: 0
+      };
+      
+      const synonyms = {
+        stress: ['stress', 'stressed', 'overwhelmed', 'anxiety', 'anxious', 'busy', 'pressure', 'tense', 'worried', 'panic', 'hectic', 'chaotic'],
+        sadness: ['sad', 'depressed', 'unhappy', 'miserable', 'gloomy', 'heartbroken', 'lonely', 'alone', 'melancholy', 'blue', 'down'],
+        fatigue: ['tired', 'exhausted', 'fatigue', 'sleepy', 'drained', 'burned out', 'burnout', 'weary', 'depleted'],
+        success: ['achievement', 'success', 'promotion', 'accomplished', 'proud', 'victory', 'celebration', 'win', 'triumph', 'breakthrough'],
+        health: ['sick', 'illness', 'health', 'pain', 'injury', 'recovery', 'hospital', 'medical', 'healing', 'wellness'],
+        change: ['change', 'transition', 'moving', 'new job', 'uncertainty', 'unknown', 'transformation', 'evolution'],
+        creativity: ['creative', 'art', 'music', 'writing', 'design', 'inspiration', 'imagine', 'innovate', 'express'],
+        relationship: ['love', 'partner', 'marriage', 'friendship', 'family', 'connection', 'romance', 'dating']
+      };
+      
+      keywordsList.forEach(word => {
+        Object.keys(synonyms).forEach(theme => {
+          if (synonyms[theme].includes(word)) {
+            themes[theme]++;
+          }
+        });
+      });
+      
+      return themes;
+    }
+    
+    function analyzeKeywordsForRoasting(keywordsList) {
+      const themes = {
+        work: 0, family: 0, dating: 0, money: 0, fitness: 0, 
+        social: 0, technology: 0, food: 0
+      };
+      
+      const roastSynonyms = {
+        work: ['work', 'job', 'boss', 'coworker', 'meeting', 'deadline', 'project', 'client', 'office', 'career', 'corporate'],
+        family: ['family', 'parents', 'mom', 'dad', 'sibling', 'brother', 'sister', 'relative', 'kid', 'child', 'mother', 'father'],
+        dating: ['date', 'dating', 'relationship', 'crush', 'love', 'partner', 'ex', 'boyfriend', 'girlfriend', 'single', 'romance'],
+        money: ['money', 'broke', 'bills', 'debt', 'expensive', 'budget', 'financial', 'rent', 'poor', 'cash', 'salary'],
+        fitness: ['gym', 'workout', 'diet', 'exercise', 'fitness', 'weight', 'health', 'cardio', 'muscle', 'protein'],
+        social: ['friends', 'social', 'party', 'awkward', 'introvert', 'antisocial', 'lonely', 'popular', 'outgoing'],
+        technology: ['phone', 'computer', 'internet', 'social media', 'app', 'tech', 'wifi', 'coding', 'gaming'],
+        food: ['food', 'eating', 'cooking', 'restaurant', 'pizza', 'diet', 'hungry', 'chef', 'recipe']
+      };
+      
+      keywordsList.forEach(word => {
+        Object.keys(roastSynonyms).forEach(theme => {
+          if (roastSynonyms[theme].includes(word)) {
+            themes[theme]++;
+          }
+        });
+      });
+      
+      return themes;
+    }
+    
+    function getPersonalityQuirk(intensity, hasPhoto) {
+      const quirks = {
+        intense: [
+          '\n\n✨ The universe is literally conspiring in your favor right now!',
+          '\n\n🔥 You are pure energy and unstoppable force!',
+          '\n\n⚡ Channel that lightning within you!'
+        ],
+        medium: [
+          '\n\n🌟 You\'ve got that special something!',
+          '\n\n💫 Your journey is uniquely yours!',
+          '\n\n🎯 Trust the process!'
+        ],
+        mild: [
+          '\n\n🌸 Gentle progress is still progress.',
+          '\n\n🍃 Take your time, you\'re doing fine.',
+          '\n\n☀️ Small steps lead to big changes.'
+        ]
+      };
+      
+      return quirks[intensity][Math.floor(Math.random() * quirks[intensity].length)];
+    }
+    
+    function getRoastPersonality(intensity, hasPhoto) {
+      const personalities = {
+        intense: [
+          '\n\n💀 Brutal but necessary truth delivered!',
+          '\n\n🔥 Consider yourself officially roasted!',
+          '\n\n⚡ That was a professional-grade roast!'
+        ],
+        medium: [
+          '\n\n😏 Roasted with love and concern!',
+          '\n\n🎭 Comedy gold right here!',
+          '\n\n🤷 The truth hurts, but it\'s funny!'
+        ],
+        mild: [
+          '\n\n😊 Gentle roasting with a smile!',
+          '\n\n🤗 Roasted with affection!',
+          '\n\n✌️ All in good fun!'
+        ]
+      };
+      
+      return personalities[intensity][Math.floor(Math.random() * personalities[intensity].length)];
+    }
+    
+    function selectRandomTemplate(templates, intensity) {
+      const levelTemplates = templates[intensity] || templates.mild;
+      return levelTemplates[Math.floor(Math.random() * levelTemplates.length)];
+    }
+    
+    function getEnhancedLiftTemplates(name, intensity, analysis) {
+      return {
+        success: {
+          intense: [
+            `${name}! You absolute LEGEND! This achievement isn't just a win - it's a declaration of war against mediocrity! You've proven that when you set your mind to something, reality itself bends to your will!`,
+            `BEHOLD ${name.toUpperCase()}, THE CONQUEROR OF OBSTACLES! Your success today is just the appetizer - the main course of your greatness is still coming!`,
+            `${name}, you didn't just succeed - you DOMINATED! This is what happens when unstoppable force meets... well, everything else just gets out of the way!`
+          ],
+          medium: [
+            `Congratulations, ${name}! Your success is well-deserved and represents all the hard work you've put in. This achievement is proof of your dedication and capabilities.`,
+            `${name}, you've turned your vision into reality! This success is a testament to your persistence and talent. You should feel incredibly proud.`,
+            `Way to go, ${name}! Your achievement today shows what happens when preparation meets opportunity. You've earned every bit of this success.`
+          ],
+          mild: [
+            `Well done, ${name}. Your achievement today is a lovely reminder of your capabilities. Take a moment to appreciate this positive step forward.`,
+            `Congratulations, ${name}! It's wonderful to see your efforts paying off. This success, big or small, is worth celebrating.`,
+            `Nice work, ${name}! Your accomplishment today adds another positive note to your journey. Keep building on this momentum.`
+          ]
+        },
+        stress: {
+          intense: [
+            `${name}, you are a WARRIOR in the arena of pressure! Every overwhelming moment is forging you into pure titanium! The stress you feel is the universe's way of saying 'I'm preparing this human for GREATNESS!'`,
+            `LISTEN UP ${name.toUpperCase()}! Pressure makes diamonds, and you're about to be the most brilliant gem this world has ever seen! Breathe fire and claim your throne!`,
+            `${name}, stress is just success trying to break through! You're not drowning - you're learning to breathe underwater like the absolute LEGEND you are!`
+          ],
+          medium: [
+            `The weight you're carrying right now, ${name}, is temporary, but the strength you're building is permanent. Even diamonds need pressure to become beautiful.`,
+            `${name}, your resilience during this stressful time is remarkable. Every challenge you face is adding to your toolkit for future success.`,
+            `It's okay to feel overwhelmed, ${name}. Stress often signals that you're growing beyond your comfort zone, which is exactly where magic happens.`
+          ],
+          mild: [
+            `It's understandable that you're feeling pressured, ${name}. These stressful moments are temporary, and you have the strength to work through them.`,
+            `Take a deep breath, ${name}. Stress is a sign that you care deeply about what you're doing. Be gentle with yourself during this busy time.`,
+            `${name}, remember that stress often comes when we're pushing ourselves to grow. Take things one step at a time.`
+          ]
+        },
+        general: {
+          intense: [
+            `${name}, you are a FORCE OF NATURE! Your unique energy makes this world brighter, bolder, and infinitely more interesting! Today is just another chapter in your EPIC story!`,
+            `ATTENTION UNIVERSE: ${name.toUpperCase()} IS HERE AND READY TO SHAKE THINGS UP! Your authentic self is your superpower - use it!`,
+            `${name}, you're not just living life - you're CONQUERING it one magnificent moment at a time! The world needs exactly what you bring to it!`
+          ],
+          medium: [
+            `Whatever you're facing right now, ${name}, remember that your unique perspective and inner strength are valuable gifts. You've overcome challenges before.`,
+            `${name}, your journey is uniquely yours, filled with lessons that only you can learn and wisdom only you can share. Trust the process.`,
+            `You're doing better than you think, ${name}. Your kindness, resilience, and authenticity make a real difference in this world.`
+          ],
+          mild: [
+            `You're doing well, ${name}. Remember that every day brings new possibilities, and you have many positive qualities to help you through.`,
+            `${name}, life has its ups and downs, but you're navigating it with grace. Take things at your own pace.`,
+            `Keep going, ${name}. Your efforts matter, and tomorrow offers fresh opportunities to grow and shine.`
+          ]
+        }
+      };
+    }
+    
+    function getEnhancedRoastTemplates(name, intensity, analysis) {
+      return {
+        work: {
+          intense: [
+            `Ah, work troubles! Let me guess - you're being paid in "experience" and "pizza parties"? Your job description said "other duties as assigned" which translates to "become everyone's personal stress ball." Your boss treats you like a Wi-Fi router - ignored until something breaks!`,
+            `Work drama strikes again! Your office is basically a reality TV show where everyone's fighting for the title of "Most Likely to Have a Breakdown by Thursday." You're the star of your own workplace sitcom, except nobody's laughing and the ratings are terrible!`,
+            `${name}, your career is like a GPS that constantly says "recalculating" but never actually finds a better route! Your workplace treats you like a printer - completely ignored until someone desperately needs you, then blamed when things go wrong!`
+          ],
+          medium: [
+            `Work drama, I see! Your job treats you like a smartphone battery - constantly drained and desperately needing a recharge. At least the coffee machine shows you more appreciation than your coworkers!`,
+            `${name}, your workplace is like a dysfunctional family, except you can't even complain about them at Thanksgiving dinner because... well, that would be unprofessional!`,
+            `Job troubles, eh? Your boss probably thinks "work-life balance" means working from home in your pajamas. Plot twist: you're still stressed, just more comfortable!`
+          ],
+          mild: [
+            `Work getting you down? Don't worry, your job is probably just as confused about what you do as you are. At least you're consistently inconsistent!`,
+            `${name}, your work situation is like a puzzle where half the pieces are missing and the box shows a completely different picture. But hey, you're still trying!`,
+            `Job stress happens to the best of us, ${name}. At least you have job security... in the sense that someone has to do the thankless tasks, right?`
+          ]
+        },
+        dating: {
+          intense: [
+            `Love life in shambles? Your dating profile reads like a cautionary tale! You're swiping right so desperately, your thumb has developed its own dating app addiction. Your last relationship ended faster than a TikTok video, and your current strategy seems to be "maybe if I lower my standards to sea level, someone will notice me!"`,
+            `${name}, your romantic life has more plot twists than a soap opera written by someone having a nervous breakdown! You're collecting red flags like they're rare Pokémon cards, and your dating history reads like a "What Not to Do" manual!`,
+            `Dating troubles? You're looking for love in all the wrong places - mainly because all the RIGHT places require social skills you haven't unlocked yet! Your love life is like a Netflix series that got cancelled after one episode!`
+          ],
+          medium: [
+            `Dating not going smoothly? Your love life has more false starts than a broken car engine. At least your standards and your luck are consistently matched - both nonexistent!`,
+            `${name}, your romantic adventures are like a GPS with a broken screen - you're definitely going somewhere, but nobody knows where, and you're probably lost!`,
+            `Love troubles, eh? Your dating life is like a subscription service you forgot you signed up for - disappointing, expensive, and you're not sure how to cancel it!`
+          ],
+          mild: [
+            `Dating not going well? Don't worry, your love life is just taking an extended vacation. It'll come back when it's ready... maybe with souvenirs!`,
+            `${name}, romance is tricky! At least you're putting yourself out there, even if "out there" feels more like "out to sea without a paddle."`,
+            `Love life challenges? Hey, at least you're getting some interesting stories out of it! That's... something, right?`
+          ]
+        },
+        general: {
+          intense: [
+            `I'm not sure what your specific problem is, but I'm confident it's a perfect storm of questionable life choices and cosmic bad luck! Your explanation was clearer than mud during an earthquake, but somehow less helpful!`,
+            `${name}, your life is like a Choose Your Own Adventure book where every choice leads to the same page that says "Try Again, But Better This Time." It's impressive how consistently you manage to surprise yourself!`,
+            `Your situation is so uniquely chaotic that it deserves its own documentary series! You've turned everyday problems into an art form - unfortunately, it's abstract art and nobody understands it!`
+          ],
+          medium: [
+            `Your situation is as mysterious as your ability to explain it clearly! Life is like a puzzle, and you seem to be working with pieces from three different boxes!`,
+            `${name}, your problems are like a riddle wrapped in an enigma, stuffed inside a question mark! But hey, at least you're entertaining!`,
+            `Not sure what's happening in your life, but it sounds like a sitcom where you're the main character and the comic relief simultaneously!`
+          ],
+          mild: [
+            `Not sure what's going on with you, but I'm sure it's very dramatic and probably not as bad as you think! Life has a way of working itself out.`,
+            `${name}, whatever's happening, you're handling it with... well, you're handling it! That counts for something!`,
+            `Your situation sounds complex, but then again, simple problems don't make for interesting stories, do they?`
+          ]
+        }
+      };
+    }
+    
+    function setIntensity(intensity) {
+      selectedIntensity = intensity;
+      document.querySelectorAll('.intensity-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`[data-intensity="${intensity}"]`).classList.add('active');
+    }
+    
+    /* Particle functions removed */
+    
+    function copyMessage() {
+      const title = messageTitle.textContent;
+      const content = messageContent.textContent;
+      const fullText = `${title}\n\n${content}`;
+      
+      navigator.clipboard.writeText(fullText).then(() => {
+        const btn = document.querySelector('.share-btn.copy');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20,6 9,17 4,12"></polyline>
+          </svg>
+          Copied!
+        `;
+        setTimeout(() => btn.innerHTML = originalText, 2000);
+      });
+    }
+    
+    // Legacy functions now redirect to image options modal
+    function shareToTwitter() { showImageOptions('twitter'); }
+    function shareToWhatsApp() { showImageOptions('whatsapp'); }
+    function shareToTelegram() { showImageOptions('telegram'); }
+    
+    let currentFormatType = 'static'; // 'static' or 'animated'
+    
+    const imageFormats = {
+      instagram: [
+        { name: 'Post (1:1)', width: 1080, height: 1080, desc: 'Perfect for Instagram feed posts' },
+        { name: 'Story (9:16)', width: 1080, height: 1920, desc: 'Optimized for Instagram Stories' },
+        { name: 'Reel (9:16)', width: 1080, height: 1920, desc: 'Vertical video format cover' }
+      ],
+      twitter: [
+        { name: 'Post (16:9)', width: 1200, height: 675, desc: 'Twitter post image' },
+        { name: 'Header (3:1)', width: 1500, height: 500, desc: 'Twitter profile header' },
+        { name: 'Card (2:1)', width: 1200, height: 600, desc: 'Twitter card format' }
+      ],
+      facebook: [
+        { name: 'Post (1.91:1)', width: 1200, height: 630, desc: 'Facebook feed post' },
+        { name: 'Story (9:16)', width: 1080, height: 1920, desc: 'Facebook Stories' },
+        { name: 'Cover (2.7:1)', width: 1640, height: 608, desc: 'Facebook page cover' }
+      ],
+      whatsapp: [
+        { name: 'Status (9:16)', width: 1080, height: 1920, desc: 'WhatsApp Status image' },
+        { name: 'Chat Share (1:1)', width: 1080, height: 1080, desc: 'Square format for sharing' }
+      ],
+      telegram: [
+        { name: 'Channel Post (16:9)', width: 1280, height: 720, desc: 'Telegram channel image' },
+        { name: 'Story (9:16)', width: 1080, height: 1920, desc: 'Telegram Stories' }
+      ],
+      reddit: [
+        { name: 'Post (4:3)', width: 1200, height: 900, desc: 'Reddit post image' },
+        { name: 'Banner (10:3)', width: 1920, height: 576, desc: 'Subreddit banner' }
+      ]
+    };
+    
+    function setFormatType(type) {
+      currentFormatType = type;
+      document.getElementById('static-btn').style.background = type === 'static' ? 'black' : '#666';
+      
+      // Update modal title
+      const title = document.getElementById('modal-title');
+      const platform = title.textContent.split(' ')[0].toLowerCase();
+      title.textContent = `${platform.charAt(0).toUpperCase() + platform.slice(1)} ${type === 'static' ? 'Image' : 'Video'} Options`;
+      
+      // Clear preview if it exists
+      const previewCanvas = document.getElementById('preview-canvas');
+      if (previewCanvas) {
+        const ctx = previewCanvas.getContext('2d');
+        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      }
+      
+      // Hide preview container
+      document.getElementById('preview-container').style.display = 'none';
+      
+      // Hide download button
+      const downloadBtn = document.getElementById('download-content-btn');
+      if (downloadBtn) {
+        downloadBtn.style.display = 'none';
+      }
+    }
+    
+    function showImageOptions(platform) {
+      const modal = document.getElementById('image-modal');
+      const title = document.getElementById('modal-title');
+      const optionsContainer = document.getElementById('image-options');
+      const previewContainer = document.getElementById('preview-container');
+      
+      // Set title
+      title.textContent = `${platform.charAt(0).toUpperCase() + platform.slice(1)} Image Options`;
+      
+      // Only show static image
+      currentFormatType = 'static';
+      
+      // Clear options container
+      optionsContainer.innerHTML = '';
+      
+      // Filter formats to only 1:1 and 16:9
+      const allowedFormats = (imageFormats[platform] || []).filter(f => {
+        const ratio = f.width / f.height;
+        return (Math.abs(ratio - 1) < 0.01) || (Math.abs(ratio - 16/9) < 0.01) || (Math.abs(ratio - 9/16) < 0.01) || (Math.abs(ratio - 1920/1080) < 0.01) || (Math.abs(ratio - 1080/1920) < 0.01);
+      });
+      
+      allowedFormats.forEach(format => {
+        const button = document.createElement('button');
+        button.innerHTML = `<div style="text-align: left;"><strong>${format.name}</strong> (${format.width}×${format.height})<br><small style="color: #666;">${format.desc}</small></div>`;
+        button.className = 'share-menu-btn';
+        button.onclick = function() {
+          previewContainer.style.display = 'block';
+          generatePreviewImage(document.getElementById('preview-canvas'), format);
+          window.selectedFormat = format;
+          window.selectedPlatform = platform;
+          // Show download button
+          let downloadBtn = document.getElementById('download-content-btn');
+          if (!downloadBtn) {
+            downloadBtn = document.createElement('button');
+            downloadBtn.id = 'download-content-btn';
+            downloadBtn.textContent = 'Download';
+            downloadBtn.onclick = function() {
+              closeImageModal();
+              // Get color values
+              const bgColor = document.getElementById('bg-color').value;
+              const textColor = document.getElementById('text-color').value;
+              const borderColor = document.getElementById('border-color').value;
+              const cursorColor = document.getElementById('cursor-color').value;
+              const colorOptions = {
+                background: bgColor,
+                text: textColor,
+                border: borderColor,
+                cursor: cursorColor
+              };
+              generateAndDownloadImage(window.selectedPlatform, window.selectedFormat, colorOptions);
+            };
+            optionsContainer.appendChild(downloadBtn);
+          }
+          downloadBtn.style.display = 'block';
+        };
+        optionsContainer.appendChild(button);
+      });
+      
+      modal.style.display = 'flex';
+      
+      // In showImageOptions, after allowedFormats.forEach, set up the Update Preview button
+      const updatePreviewBtn = document.getElementById('update-preview-btn');
+      if (updatePreviewBtn) {
+        updatePreviewBtn.onclick = function() {
+          if (window.selectedFormat) {
+            previewContainer.style.display = 'block';
+            generatePreviewImage(document.getElementById('preview-canvas'), window.selectedFormat);
+          }
+        };
+      }
+    }
+    
+    function closeImageModal() {
+      document.getElementById('image-modal').style.display = 'none';
+      
+      // Clear preview canvas if it exists
+      const previewCanvas = document.getElementById('preview-canvas');
+      if (previewCanvas) {
+        const ctx = previewCanvas.getContext('2d');
+        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      }
+      
+      // Hide preview container
+      document.getElementById('preview-container').style.display = 'none';
+    }
+    
+    function generateAndDownloadImage(platform, format, colorOptions = null) {
+      generateMessageImage(format.width, format.height, format.name, colorOptions).then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${messageTitle.textContent.replace(/[^a-zA-Z0-9]/g, '_')}_${format.name.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // Platform-specific sharing instructions
+        let instruction = '';
+        switch(platform) {
+          case 'instagram':
+            instruction = 'Image downloaded! Upload it to Instagram to share your message.';
+            break;
+          case 'twitter':
+            instruction = 'Image downloaded! Upload it to Twitter with your tweet.';
+            break;
+          case 'facebook':
+            instruction = 'Image downloaded! Upload it to Facebook to share your message.';
+            break;
+          case 'whatsapp':
+            instruction = 'Image downloaded! Send it via WhatsApp to share your message.';
+            break;
+          case 'telegram':
+            instruction = 'Image downloaded! Upload it to Telegram to share your message.';
+            break;
+          case 'reddit':
+            instruction = 'Image downloaded! Upload it to Reddit with your post.';
+            break;
+        }
+        
+        alert(instruction);
+        
+        // Also try to open platform sharing if possible
+        tryPlatformShare(platform);
+        
+      }).catch(err => {
+        console.error('Error generating image:', err);
+        // Fallback to text sharing
+        fallbackTextShare(platform);
+      });
+    }
+    
+    function tryPlatformShare(platform) {
+      const title = messageTitle.textContent;
+      const content = messageContent.textContent.substring(0, 400) + '...';
+      const text = encodeURIComponent(`${title}\n\n${content}\n\nGenerated by Lift or Zing`);
+      
+      switch(platform) {
+        case 'twitter':
+          window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+          break;
+        case 'facebook':
+          window.open(`https://www.facebook.com/sharer/sharer.php?quote=${text}`, '_blank');
+          break;
+        case 'whatsapp':
+          window.open(`https://wa.me/?text=${text}`, '_blank');
+          break;
+        case 'telegram':
+          window.open(`https://t.me/share/url?text=${text}`, '_blank');
+          break;
+        case 'reddit':
+          const titleEncoded = encodeURIComponent(messageTitle.textContent);
+          window.open(`https://www.reddit.com/submit?title=${titleEncoded}&text=${text}`, '_blank');
+          break;
+      }
+    }
+    
+    function fallbackTextShare(platform) {
+      const title = messageTitle.textContent;
+      const content = messageContent.textContent.substring(0, 400) + '...';
+      const text = `${title}\n\n${content}\n\nGenerated by Lift or Zing`;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        alert(`Text copied to clipboard! Paste it in your ${platform} post.`);
+      });
+    }
+    
+    function generateMessageImage(width = 1080, height = 1080, formatName = 'Default', colorOptions = null) {
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Use color options or defaults
+        const colors = colorOptions || {
+          background: '#ffffff',
+          text: '#000000',
+          border: '#000000',
+          cursor: '#000000'
+        };
+        
+        // Clear and fill background
+        ctx.fillStyle = colors.background;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Calculate responsive dimensions (matching new design)
+        const baseSize = Math.min(width, height);
+        const padding = baseSize * 0.08;
+        const cardPadding = baseSize * 0.06;
+        
+        // Draw card with shadow
+        const cardX = padding;
+        const cardY = padding;
+        const cardWidth = width - (padding * 2);
+        const cardHeight = height - (padding * 2);
+        
+        // Shadow effect
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        ctx.shadowBlur = baseSize * 0.012;
+        ctx.shadowOffsetX = baseSize * 0.004;
+        ctx.shadowOffsetY = baseSize * 0.006;
+        
+        // Card background
+        ctx.fillStyle = colors.background;
+        ctx.fillRect(cardX, cardY, cardWidth, cardHeight);
+        
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // Thin border
+        ctx.strokeStyle = colors.border === '#000000' ? '#333333' : colors.border;
+        ctx.lineWidth = Math.max(1, baseSize * 0.002);
+        ctx.strokeRect(cardX, cardY, cardWidth, cardHeight);
+        
+        // Calculate typography (matching new design)
+        const titleFontSize = baseSize * 0.055;
+        const contentFontSize = baseSize * 0.032;
+        const footerFontSize = baseSize * 0.022;
+        
+        // Modern font stack
+        const titleFont = `bold ${titleFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+        const contentFont = `${contentFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+        const footerFont = `${footerFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+        
+        // Get title text (clean)
+        const title = messageTitle.textContent.trim();
+        
+        // Title positioning with better hierarchy
+        ctx.fillStyle = colors.text;
+        ctx.font = titleFont;
+        ctx.textAlign = 'center';
+        const titleY = cardY + cardPadding + titleFontSize;
+        
+        // Add accent color for protocol activation
+        if (title.includes('LIFT') || title.includes('PROTOCOL')) {
+          ctx.fillStyle = '#00ff88'; // Neon green accent
+        } else if (title.includes('ZING') || title.includes('ROAST')) {
+          ctx.fillStyle = '#ff4466'; // Neon red accent
+        }
+        
+        // Generous vertical spacing between title and content (matching new design)
+        const titleContentGap = baseSize * 0.08;
+        
+        // Content area setup
+        ctx.fillStyle = colors.text;
+        ctx.font = contentFont;
+        ctx.textAlign = 'left';
+        
+        // Content positioning
+        const contentStartY = titleY + titleContentGap;
+        const contentMaxWidth = cardWidth - (cardPadding * 2);
+        const contentX = cardX + cardPadding;
+        
+        // Wrap text for optimal line length (40-50 characters)
+        const targetLineLength = 45;
+        const charWidth = ctx.measureText('M').width; // Monospace character width
+        const maxCharsPerLine = Math.floor(contentMaxWidth / charWidth);
+        const actualCharsPerLine = Math.min(targetLineLength, maxCharsPerLine);
+        const actualMaxWidth = charWidth * actualCharsPerLine;
+        
+        // Local text wrapping function
+        function localWrapText(text, maxWidth) {
+          const words = text.split(' ');
+          const lines = [];
+          let currentLine = '';
+          
+          for (const word of words) {
+            const testLine = currentLine + (currentLine ? ' ' : '') + word;
+            if (ctx.measureText(testLine).width <= maxWidth) {
+              currentLine = testLine;
+            } else {
+              if (currentLine) lines.push(currentLine);
+              currentLine = word;
+            }
+          }
+          if (currentLine) lines.push(currentLine);
+          return lines;
+        }
+        
+        const content = messageContent.textContent;
+        const lines = localWrapText(content, actualMaxWidth);
+        
+        // Calculate line height for readability
+        const lineHeight = contentFontSize * 1.6;
+        
+        // Footer space reservation
+        const footerHeight = baseSize * 0.12;
+        const availableContentHeight = cardHeight - (titleY - cardY) - titleContentGap - footerHeight;
+        const maxContentLines = Math.floor(availableContentHeight / lineHeight);
+        
+        // Draw content lines
+        let contentY = contentStartY;
+        const linesToShow = Math.min(lines.length, maxContentLines);
+        
+        for (let i = 0; i < linesToShow; i++) {
+          ctx.fillText(lines[i], contentX, contentY);
+          contentY += lineHeight;
+        }
+        
+        // Footer area with attribution
+        const footerY = cardY + cardHeight - cardPadding;
+        
+        // Subtle divider line
+        ctx.beginPath();
+        ctx.strokeStyle = colors.text === '#ffffff' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)';
+        ctx.lineWidth = 1;
+        const dividerY = footerY - (footerFontSize * 2);
+        ctx.moveTo(contentX, dividerY);
+        ctx.lineTo(contentX + actualMaxWidth, dividerY);
+        ctx.stroke();
+        
+        // Footer text
+        ctx.font = footerFont;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = colors.text === '#ffffff' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)';
+        ctx.fillText('Generated by Lift or Zing', width / 2, footerY - (footerFontSize * 0.3));
+        
+        // Convert to blob
+        canvas.toBlob(resolve, 'image/jpeg', 0.9);
+      });
+    }
+    
+    // Function to generate preview image
+    function generatePreviewImage(canvas, format) {
+      const ctx = canvas.getContext('2d');
+      
+      // Get color values
+      const bgColor = document.getElementById('bg-color').value;
+      const textColor = document.getElementById('text-color').value;
+      const borderColor = document.getElementById('border-color').value;
+      
+      // Create color options
+      const colorOptions = {
+        background: bgColor,
+        text: textColor,
+        border: borderColor,
+        cursor: textColor
+      };
+      
+      // Clear and fill background
+      ctx.fillStyle = colorOptions.background;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Calculate responsive dimensions
+      const baseSize = Math.min(canvas.width, canvas.height);
+      const padding = baseSize * 0.08; // 8% padding
+      const cardPadding = baseSize * 0.06; // 6% inner card padding
+      
+      // Draw subtle card background with shadow effect
+      const cardX = padding;
+      const cardY = padding;
+      const cardWidth = canvas.width - (padding * 2);
+      const cardHeight = canvas.height - (padding * 2);
+      
+      // Shadow effect
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+      ctx.shadowBlur = baseSize * 0.012;
+      ctx.shadowOffsetX = baseSize * 0.004;
+      ctx.shadowOffsetY = baseSize * 0.006;
+      
+      // Card background
+      ctx.fillStyle = colorOptions.background;
+      ctx.fillRect(cardX, cardY, cardWidth, cardHeight);
+      
+      // Reset shadow
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      
+      // Thin border
+      ctx.strokeStyle = borderColor === '#000000' ? '#333333' : colorOptions.border;
+      ctx.lineWidth = Math.max(1, baseSize * 0.002);
+      ctx.strokeRect(cardX, cardY, cardWidth, cardHeight);
+      
+      // Calculate typography
+      const titleFontSize = baseSize * 0.055; // Larger title
+      const contentFontSize = baseSize * 0.032; // Balanced content
+      const footerFontSize = baseSize * 0.022; // Smaller footer
+      
+      // Modern font stack
+      const titleFont = `bold ${titleFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+      const contentFont = `${contentFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+      const footerFont = `${footerFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+      
+      // Get title text (clean)
+      const title = messageTitle.textContent.trim();
+      
+      // Title positioning with better hierarchy
+      ctx.fillStyle = colorOptions.text;
+      ctx.font = titleFont;
+      ctx.textAlign = 'center';
+      const titleY = cardY + cardPadding + titleFontSize;
+      
+      // Add accent color for protocol activation
+      if (title.includes('LIFT') || title.includes('PROTOCOL')) {
+        ctx.fillStyle = '#00ff88'; // Neon green accent
+      } else if (title.includes('ZING') || title.includes('ROAST')) {
+        ctx.fillStyle = '#ff4466'; // Neon red accent
+      }
+      
+      // Draw title - ensure bold, large, clear
+      ctx.font = `bold ${Math.max(titleFontSize, 48)}px 'Orbitron', 'JetBrains Mono', monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = textColor;
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 8;
+      ctx.fillText(title, width / 2, titleY);
+      ctx.shadowBlur = 0;
+      
+      // Generous vertical spacing between title and content
+      const titleContentGap = baseSize * 0.08; // 8% gap
+      
+      // Content area setup
+      ctx.fillStyle = colorOptions.text;
+      ctx.font = contentFont;
+      ctx.textAlign = 'left';
+      
+      // Content positioning
+      const contentStartY = titleY + titleContentGap;
+      const contentMaxWidth = cardWidth - (cardPadding * 2);
+      const contentX = cardX + cardPadding;
+      
+      // Wrap text for optimal line length (40-50 characters)
+      const targetLineLength = 45;
+      const charWidth = ctx.measureText('M').width; // Monospace character width
+      const maxCharsPerLine = Math.floor(contentMaxWidth / charWidth);
+      const actualCharsPerLine = Math.min(targetLineLength, maxCharsPerLine);
+      const actualMaxWidth = charWidth * actualCharsPerLine;
+      
+      let lines = [];
+      if (typeof wrapText === 'function') {
+        lines = wrapText(messageContent.textContent, actualMaxWidth, ctx);
+      } else {
+        // Fallback text wrapping
+        const words = messageContent.textContent.split(' ');
+        let currentLine = '';
+        for (const word of words) {
+          const testLine = currentLine + (currentLine ? ' ' : '') + word;
+          if (ctx.measureText(testLine).width <= actualMaxWidth) {
+            currentLine = testLine;
+          } else {
+            if (currentLine) lines.push(currentLine);
+            currentLine = word;
+          }
+        }
+        if (currentLine) lines.push(currentLine);
+      }
+      
+      // Calculate line height for readability
+      const lineHeight = contentFontSize * 1.6;
+      
+      // Footer space reservation
+      const footerHeight = baseSize * 0.12;
+      const availableContentHeight = cardHeight - (titleY - cardY) - titleContentGap - footerHeight;
+      const maxContentLines = Math.floor(availableContentHeight / lineHeight);
+      
+      // Draw content lines
+      let contentY = contentStartY;
+      const linesToShow = Math.min(lines.length, maxContentLines);
+      
+      for (let i = 0; i < linesToShow; i++) {
+        ctx.fillText(lines[i], contentX, contentY);
+        contentY += lineHeight;
+      }
+      
+      // Footer area with attribution
+      const footerY = cardY + cardHeight - cardPadding;
+      
+      // Subtle divider line
+      ctx.beginPath();
+      ctx.strokeStyle = colorOptions.text === '#ffffff' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)';
+      ctx.lineWidth = 1;
+      const dividerY = footerY - (footerFontSize * 2);
+      ctx.moveTo(contentX, dividerY);
+      ctx.lineTo(contentX + actualMaxWidth, dividerY);
+      ctx.stroke();
+      
+      // Footer text
+      ctx.font = footerFont;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = colorOptions.text === '#ffffff' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)';
+      ctx.fillText('Generated by Lift or Zing', canvas.width / 2, footerY - (footerFontSize * 0.3));
+      
+      // Hide loading indicator
+      document.getElementById('preview-loading').style.display = 'none';
+      
+      // Show download button
+      document.getElementById('download-content-btn').style.display = 'block';
+    }
+    
+    // Function to generate preview video animation
+    function generatePreviewVideo(canvas, format) {
+      const ctx = canvas.getContext('2d');
+      
+      // Get color values
+      const bgColor = document.getElementById('bg-color').value;
+      const textColor = document.getElementById('text-color').value;
+      const borderColor = document.getElementById('border-color').value;
+      const cursorColor = document.getElementById('cursor-color').value;
+      
+      // Create color options
+      const colorOptions = {
+        background: bgColor,
+        text: textColor,
+        border: borderColor,
+        cursor: cursorColor
+      };
+      
+      // Create a simplified animation for preview using new design
+      let step = 0;
+      const totalSteps = 30; // Short preview animation
+      const title = messageTitle.textContent;
+      const titleLength = Math.min(title.length, 15); // Show max 15 chars in preview
+      const shortenedTitle = title.substring(0, titleLength) + (title.length > titleLength ? '...' : '');
+      
+      function drawPreviewFrame() {
+        // Clear canvas
+        ctx.fillStyle = colorOptions.background;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Calculate responsive dimensions (same as static)
+        const baseSize = Math.min(canvas.width, canvas.height);
+        const padding = baseSize * 0.08;
+        const cardPadding = baseSize * 0.06;
+        
+        // Draw card with shadow
+        const cardX = padding;
+        const cardY = padding;
+        const cardWidth = canvas.width - (padding * 2);
+        const cardHeight = canvas.height - (padding * 2);
+        
+        // Shadow effect
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        ctx.shadowBlur = baseSize * 0.012;
+        ctx.shadowOffsetX = baseSize * 0.004;
+        ctx.shadowOffsetY = baseSize * 0.006;
+        
+        // Card background
+        ctx.fillStyle = colorOptions.background;
+        ctx.fillRect(cardX, cardY, cardWidth, cardHeight);
+        
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // Typography (matching new design)
+        const titleFontSize = baseSize * 0.055;
+        const contentFontSize = baseSize * 0.032;
+        
+        // Modern font stack
+        const titleFont = `bold ${titleFontSize}px 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace`;
+        
+        // Draw title progressively with new styling
+        const charsToShow = Math.floor((step / totalSteps) * shortenedTitle.length);
+        const visibleTitle = shortenedTitle.substring(0, charsToShow);
+        
+        ctx.font = titleFont;
+        ctx.textAlign = 'center';
+        
+        // Add accent color for protocol activation
+        if (title.includes('LIFT') || title.includes('PROTOCOL')) {
+          ctx.fillStyle = '#00ff88'; // Neon green accent
+        } else if (title.includes('ZING') || title.includes('ROAST')) {
+          ctx.fillStyle = '#ff4466'; // Neon red accent
+        } else {
+          ctx.fillStyle = colorOptions.text;
+        }
+        
+        const titleY = cardY + cardPadding + titleFontSize;
+        ctx.fillText(visibleTitle, canvas.width / 2, titleY);
+        
+        // Show blinking cursor at end of title
+        if (step < totalSteps && charsToShow === visibleTitle.length) {
+          const titleWidth = ctx.measureText(visibleTitle).width;
+          const cursorX = (canvas.width / 2) + (titleWidth / 2) + 5;
+          
+          if (Math.floor(step / 3) % 2 === 0) { // Blink every 3 frames
+            ctx.fillStyle = colorOptions.cursor;
+            ctx.fillRect(cursorX, titleY - titleFontSize + 5, 2, titleFontSize - 10);
+          }
+        }
+        
+        // Show preview content text after title finishes
+        if (step > totalSteps * 0.6) {
+          ctx.fillStyle = colorOptions.text;
+          ctx.font = `${contentFontSize}px 'JetBrains Mono', monospace`;
+          ctx.textAlign = 'left';
+          
+          const contentY = titleY + (baseSize * 0.08) + contentFontSize;
+          const contentX = cardX + cardPadding;
+          ctx.fillText('Preview: Your message appears here...', contentX, contentY);
+        }
+        
+        step++;
+        if (step <= totalSteps) {
+          setTimeout(drawPreviewFrame, 100); // 100ms per frame
+        } else {
+          // Animation complete, hide loading and show download button
+          document.getElementById('preview-loading').style.display = 'none';
+          document.getElementById('download-content-btn').style.display = 'block';
+        }
+      }
+      
+      // Start preview animation
+      drawPreviewFrame();
+    }
+    
+    function generateAndDownloadVideo(platform, format, colorOptions = null) {
+      // Show loading message
+      const loadingMsg = document.createElement('div');
+      loadingMsg.style.cssText = `
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: black; color: white; padding: 20px; border-radius: 8px;
+        font-family: 'JetBrains Mono', monospace; z-index: 10000;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      `;
+      loadingMsg.textContent = 'Generating animated video... Please wait';
+      document.body.appendChild(loadingMsg);
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = format.width;
+      canvas.height = format.height;
+      
+      // Check if MediaRecorder is supported
+      if (!window.MediaRecorder) {
+        document.body.removeChild(loadingMsg);
+        alert('Video recording not supported in this browser. Generating static image instead.');
+        generateAndDownloadImage(platform, format, colorOptions);
+        return;
+      }
+      
+      // Try different codecs for better browser compatibility
+      // Prioritize MP4 for better device/platform compatibility
+      let mimeType = 'video/mp4;codecs=avc1.42E01E,mp4a.40.2';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/mp4;codecs=avc1.42001E,mp4a.40.2';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/mp4';
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            // Fallback to WebM if MP4 is not supported
+            mimeType = 'video/webm;codecs=vp9';
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+              mimeType = 'video/webm;codecs=vp8';
+              if (!MediaRecorder.isTypeSupported(mimeType)) {
+                mimeType = 'video/webm';
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                  document.body.removeChild(loadingMsg);
+                  alert('Video recording not supported in this browser. Generating static image instead.');
+                  generateAndDownloadImage(platform, format, colorOptions);
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      const stream = canvas.captureStream(30); // 30 FPS
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      
+      const chunks = [];
+      let recordingStarted = false;
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onerror = (event) => {
+        console.error('MediaRecorder error:', event);
+        document.body.removeChild(loadingMsg);
+        alert('Video generation failed. Please try again or use static image instead.');
+      };
+      
+      mediaRecorder.onstop = () => {
+        if (chunks.length === 0) {
+          document.body.removeChild(loadingMsg);
+          alert('Video generation failed. Please try again or use static image instead.');
+          return;
+        }
+        
+        const blob = new Blob(chunks, { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+        const cleanTitle = messageTitle.textContent.replace(/[^a-zA-Z0-9]/g, '_');
+        const cleanFormat = format.name.replace(/[^a-zA-Z0-9]/g, '_');
+        a.download = `LiftOrZing_${cleanTitle}_${cleanFormat}_video.${extension}`;
+        
+        // Force download by adding to DOM and clicking
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up after short delay
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          document.body.removeChild(loadingMsg);
+          alert('Animated video downloaded successfully!');
+        }, 100);
+      };
+      
+      mediaRecorder.onstart = () => {
+        recordingStarted = true;
+        console.log('Video recording started');
+      };
+      
+      // Start recording with timeout fallback
+      try {
+        mediaRecorder.start(100); // Collect data every 100ms for better reliability
+        
+        // Timeout fallback in case recording doesn't start
+        setTimeout(() => {
+          if (!recordingStarted) {
+            document.body.removeChild(loadingMsg);
+            alert('Video recording failed to start. Please try again or use static image instead.');
+            return;
+          }
+        }, 2000);
+        
+      } catch (error) {
+        console.error('Failed to start recording:', error);
+        document.body.removeChild(loadingMsg);
+        alert('Video recording failed to start. Please try again or use static image instead.');
+        return;
+      }
+      
+      // Animate the typewriter effect with custom colors if provided
+      animateTypewriterEffect(canvas, ctx, format, colorOptions).then(() => {
+        // Stop recording after animation completes with extra buffer time
+        setTimeout(() => {
+          if (mediaRecorder.state === 'recording') {
+            try {
+              mediaRecorder.stop();
+            } catch (error) {
+              console.error('Error stopping recorder:', error);
+              document.body.removeChild(loadingMsg);
+              alert('Video generation completed but download failed. Please try again.');
+            }
+          }
+        }, 500); // Reduced from 1000ms for faster completion
+      }).catch((error) => {
+        console.error('Animation error:', error);
+        if (mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+        }
+        document.body.removeChild(loadingMsg);
+        alert('Video generation failed during animation. Please try again.');
+      });
+    }
+    
+    function animateTypewriterEffect(canvas, ctx, format, colorOptions = null) {
+      return new Promise((resolve) => {
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        // Use provided colors or defaults
+        const colors = colorOptions || {
+          background: '#ffffff',
+          text: '#000000',
+          border: '#000000',
+          cursor: '#000000'
+        };
+        
+        // Calculate responsive font sizes - optimized for different aspect ratios
+        const isSquareFormat = Math.abs(width - height) < 20; // Check if it's close to square format
+        const aspectRatio = width / height;
+        
+        // Adjust font sizes based on format - smaller fonts for square formats to fit more content
+        let fontMultiplier = isSquareFormat ? 0.045 : 0.055; // Smaller for square formats
+        if (aspectRatio > 1.5) fontMultiplier = 0.06; // Larger for wide formats
+        
+        const baseFontSize = Math.min(width, height) * fontMultiplier;
+        const titleFontSize = baseFontSize * (isSquareFormat ? 1.1 : 1.3); // Smaller title for squares
+        const contentFontSize = baseFontSize * (isSquareFormat ? 0.75 : 0.85); // Smaller content for squares
+        const footerFontSize = baseFontSize * 0.55;
+        
+        const title = messageTitle.textContent;
+        const content = messageContent.textContent;
+        
+        // Prepare text lines
+        ctx.font = `${contentFontSize}px Arial, sans-serif`;
+        const maxWidth = width - 80;
+        // Use the global wrapText function
+        const lines = typeof wrapText === 'function' ? wrapText(content, maxWidth, ctx) : [];
+        
+        let currentStep = 0;
+        const totalSteps = title.length + lines.join(' ').length + 50; // Extra steps for pauses
+        
+        function drawFrame() {
+          // Clear canvas with background color
+          ctx.fillStyle = colors.background;
+          ctx.fillRect(0, 0, width, height);
+          
+          // Add border
+          ctx.strokeStyle = colors.border;
+          ctx.lineWidth = Math.max(4, Math.min(width, height) * 0.008);
+          const borderOffset = ctx.lineWidth;
+          ctx.strokeRect(borderOffset, borderOffset, width - (borderOffset * 2), height - (borderOffset * 2));
+          
+          // Draw title progressively with proper spacing
+          ctx.fillStyle = colors.text;
+          ctx.font = `bold ${titleFontSize}px Arial, sans-serif`;
+          ctx.textAlign = 'center';
+          
+          // Parse the title to maintain our spacing in the image
+          const titleHTML = messageTitle.innerHTML; // Get HTML content to preserve spaces
+          let processedTitle = title;
+          
+          // If we're using HTML for spacing, extract just the text parts
+          if (titleHTML.includes('<span')) {
+            // Extract the name part and the type part
+            const namePart = titleHTML.split('<span')[0].trim();
+            const typePart = titleHTML.split('</span>')[1].trim();
+            // Create processed title with moderate spacing
+            processedTitle = `${namePart}   ${typePart}`;
+          }
+          
+          const titleCharsToShow = Math.min(currentStep, processedTitle.length);
+          const partialTitle = processedTitle.substring(0, titleCharsToShow);
+          // Center title vertically with proper margins
+          const titleY = (height * 0.15) + titleFontSize;
+          ctx.fillText(partialTitle, width / 2, titleY);
+          
+          // Draw cursor for title if still typing
+          if (titleCharsToShow < title.length && Math.floor(Date.now() / 500) % 2) {
+            const titleWidth = ctx.measureText(partialTitle).width;
+            ctx.fillRect(width / 2 + titleWidth / 2 + 5, titleY - titleFontSize + 15, 3, titleFontSize);
+          }
+          
+          // Draw content progressively after title is complete
+          if (currentStep > title.length + 10) { // Small pause after title
+            ctx.font = `${contentFontSize}px Arial, sans-serif`;
+            ctx.textAlign = 'left';
+            
+            const contentStartStep = title.length + 10;
+            const contentCharsToShow = Math.min(currentStep - contentStartStep, lines.join(' ').length);
+            
+            let charCount = 0;
+            // Start content below the title with proper spacing - optimized for format
+            const titleY = (height * 0.15) + titleFontSize;
+            const titleGap = isSquareFormat ? (height * 0.04) : (height * 0.06); // Smaller gap for squares
+            let y = titleY + titleGap;
+            const lineHeight = contentFontSize * (isSquareFormat ? 1.4 : 1.6); // Tighter line height for squares
+            
+            // Calculate available content height considering footer space - optimized for square formats
+            const footerSpace = isSquareFormat ? (height * 0.10) : (height * 0.12); // Less footer space for squares
+            const contentMaxY = height - footerSpace;
+            const leftMargin = isSquareFormat ? 40 : 50; // Tighter margin for squares
+            
+            for (let i = 0; i < lines.length; i++) {
+              const line = lines[i];
+              const lineEndChar = charCount + line.length + 1; // +1 for space
+              
+              if (contentCharsToShow > charCount) {
+                const currentY = y + (i * lineHeight);
+                // Only draw if within content area
+                if (currentY <= contentMaxY) {
+                  const charsInThisLine = Math.min(contentCharsToShow - charCount, line.length);
+                  const partialLine = line.substring(0, charsInThisLine);
+                  ctx.fillText(partialLine, leftMargin, currentY);
+                  
+                  // Draw cursor if still typing this line
+                  if (charsInThisLine < line.length && Math.floor(Date.now() / 300) % 2) {
+                    const lineWidth = ctx.measureText(partialLine).width;
+                    ctx.fillRect(leftMargin + lineWidth + 2, currentY - contentFontSize + 5, 2, contentFontSize);
+                  }
+                }
+              }
+              
+              charCount = lineEndChar;
+              if (contentCharsToShow <= charCount) break;
+            }
+          }
+          
+          // Draw footer when content is complete
+          if (currentStep >= totalSteps - 10) {
+            ctx.font = `${footerFontSize}px Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#666666';
+            const footerY = height - (height * 0.05); // Proportional footer positioning
+            
+            // Add subtle divider line for square formats (1:1 ratio)
+            if (Math.abs(width - height) < 20) { // Check if it's close to square format
+              ctx.beginPath();
+              ctx.strokeStyle = '#dddddd';
+              ctx.lineWidth = 1;
+              ctx.moveTo(width * 0.1, footerY - footerFontSize * 1.5);
+              ctx.lineTo(width * 0.9, footerY - footerFontSize * 1.5);
+              ctx.stroke();
+            }
+            
+            ctx.fillText('Generated by Lift or Zing', width / 2, footerY);
+          }
+          
+          currentStep++;
+          
+          if (currentStep < totalSteps) {
+            setTimeout(drawFrame, 45); // Faster typewriter speed
+          } else {
+            resolve();
+          }
+        }
+        
+        drawFrame();
+      });
+    }
+    
+    function wrapText(text, maxWidth, ctx) {
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = '';
+      
+      for (const word of words) {
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        const metrics = ctx.measureText(testLine);
+        
+        if (metrics.width > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+      
+      return lines;
+    }
+    
+    // Legacy functions now redirect to image options modal
+    function shareToFacebook() { showImageOptions('facebook'); }
+    function shareToReddit() { showImageOptions('reddit'); }
+    
+    function downloadMessage() {
+      const title = messageTitle.textContent;
+      const content = messageContent.textContent;
+      const fullText = `${title}\n\n${content}\n\nGenerated by Lift or Zing`;
+      
+      const blob = new Blob([fullText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    function generateMessage(event) {
+      event.preventDefault();
+      
+      // Show loading indicator
+      document.getElementById("loading").style.display = "block";
+      
+      // Disable submit button
+      const submitBtn = document.getElementById("submit-btn");
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = "0.7";
+      
+      try {
+        // Validate input method requirements
+        if (currentInputMethod === 'text') {
+          const keywords = document.getElementById('keywords-textarea').value.trim();
+          if (!keywords) {
+            alert('Please describe your mood or upload a photo to continue.');
+            hideLoadingAndEnableButton();
+            return;
+          }
+        } else if (currentInputMethod === 'photo') {
+          const photoFile = document.getElementById('photo-upload').files[0];
+          if (!photoFile) {
+            alert('Please upload a photo or describe your mood to continue.');
+            hideLoadingAndEnableButton();
+            return;
+          }
+        }
+        
+        // Get form values
+        const form = document.getElementById('mood-form');
+        const formData = new FormData(form);
+        const name = formData.get('name');
+        const gender = formData.get('gender') || 'person';
+        const keywords = formData.get('keywords') || '';
+        const photoFile = formData.get('photo');
+        
+        // Show loading state
+        showLoadingState();
+        
+        // Prepare data for API call
+        const requestData = {
+          name: name,
+          gender: gender,
+          mood: keywords,
+          intensity: selectedIntensity,
+          type: currentType,
+          hasPhoto: photoFile && photoFile.size > 0,
+          photoFile: photoFile // for local fallback
+        };
+        
+        // Call Netlify function - use relative path for development and deployed environments
+        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? 'http://localhost:8888/.netlify/functions/generate'  // Local development 
+          : '/.netlify/functions/generate';                     // Production deployment
+        
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        })
+        .then(response => {
+          // Check if response is OK before trying to parse JSON
+          if (!response.ok) {
+            throw new Error(`API responded with status ${response.status}`);
+          }
+          // Check content type to ensure it's actually JSON
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error(`Expected JSON response but got ${contentType}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          hideLoadingState();
+          hideLoadingAndEnableButton();
+          
+          if (data.error) {
+            console.error('API Error:', data.error);
+            // Fallback to local generation on error
+            generateLocalMessage(name, gender, keywords, selectedIntensity, photoFile);
+          } else {
+            displayGeneratedMessage(data.title, data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Network or Parsing Error:', error);
+          hideLoadingState();
+          hideLoadingAndEnableButton();
+          // Fallback to local generation on network error
+          generateLocalMessage(name, gender, keywords, selectedIntensity, photoFile);
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        hideLoadingAndEnableButton();
+      }
+      
+      // Helper function to hide loading and enable button
+      function hideLoadingAndEnableButton() {
+        document.getElementById("loading").style.display = "none";
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = "1";
+      }
+      
+      // Save last form data for retry
+      window.lastFormData = { apiUrl, requestData };
+    }
+    
+    function showLoadingState() {
+      // Hide form with animation
+      formContainer.style.animation = 'fadeIn 0.3s ease forwards reverse';
+      formContainer.style.opacity = '0';
+      
+      setTimeout(() => {
+        formContainer.style.display = 'none';
+        
+        // Show message container with loading
+        messageContainer.style.animation = '';
+        messageContainer.style.opacity = '0';
+        messageContainer.style.display = 'block';
+        
+        // Set loading content
+        messageTitle.innerHTML = 'PROCESSING...';
+        messageTitle.style.color = 'white';
+        messageContent.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 2rem; margin-bottom: 20px;">⚡</div>
+            <div style="font-size: 1.2rem; margin-bottom: 10px;">Generating your personalized message...</div>
+            <div style="font-size: 0.9rem; color: #aaa;">Connecting to AI service...</div>
+            <div style="margin-top: 20px;">
+              <div style="width: 100%; height: 4px; background: #333; border-radius: 2px; overflow: hidden;">
+                <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #666 0%, #fff 50%, #666 100%); animation: loading-bar 2s infinite;"></div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Force reflow and show
+        void messageContainer.offsetWidth;
+        messageContainer.style.animation = 'slideInRight 0.7s cubic-bezier(0.19, 1, 0.22, 1) forwards';
+        messageContainer.style.opacity = '1';
+        
+        // Hide mobile footer when message is shown
+        document.body.classList.remove('home-page');
+      }, 250);
+    }
+    
+    function hideLoadingState() {
+      // Loading state will be replaced by the actual message
+    }
+    
+    function displayGeneratedMessage(title, message) {
+      messageTitle.innerHTML = title;
+      messageTitle.style.color = 'white';
+      messageContent.innerHTML = `<p style="line-height: 1.6; white-space: pre-wrap;">${message}</p>`;
+      
+      // Remove any existing retry button
+      const oldRetry = document.getElementById('retry-btn');
+      if (oldRetry) oldRetry.remove();
+      
+      // Show Try Again button only if message is 'Oops, nothing came through.'
+      if (message.trim() === 'Oops, nothing came through.') {
+        const retryDiv = document.createElement('div');
+        retryDiv.style.display = 'flex';
+        retryDiv.style.flexDirection = 'column';
+        retryDiv.style.alignItems = 'center';
+        retryDiv.style.justifyContent = 'center';
+        retryDiv.style.marginTop = '32px';
+        // Icon button
+        const retryBtn = document.createElement('button');
+        retryBtn.id = 'retry-btn';
+        retryBtn.style.background = 'none';
+        retryBtn.style.border = 'none';
+        retryBtn.style.cursor = 'pointer';
+        retryBtn.style.padding = '0';
+        retryBtn.style.display = 'flex';
+        retryBtn.style.flexDirection = 'column';
+        retryBtn.style.alignItems = 'center';
+        retryBtn.style.justifyContent = 'center';
+        retryBtn.style.outline = 'none';
+        retryBtn.innerHTML = `<img src='reload.png' alt='Try Again' style='width:48px;height:48px;display:block;margin-bottom:8px;filter:invert(1) brightness(2);' />`;
         // Label
         const label = document.createElement('div');
         label.textContent = 'Try Again';
