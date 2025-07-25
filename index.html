@@ -1196,9 +1196,9 @@
     
     .intensity-btn.active {
       background: #111;
-      border-color: #00ff00;
+      border-color: #666;
       color: white;
-      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     
     .intensity-btn.active::after {
@@ -1207,7 +1207,7 @@
       top: 5px;
       right: 5px;
       font-size: 10px;
-      color: #00ff00;
+      color: #fff;
     }
     
     .intensity-btn:not(.active):hover {
@@ -1233,6 +1233,23 @@
       .intensity-selector, .action-button, #loading {
         margin-bottom: 20px !important;
       }
+    }
+  </style>
+  <style>
+    /* ...existing styles... */
+    .zing-mode .intensity-btn.active {
+      border-color: #ff0000 !important;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.3) !important;
+    }
+    .zing-mode .intensity-btn.active::after {
+      color: #ff0000 !important;
+    }
+    .lift-mode .intensity-btn.active {
+      border-color: #00ff00 !important;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3) !important;
+    }
+    .lift-mode .intensity-btn.active::after {
+      color: #00ff00 !important;
     }
   </style>
 </head>
@@ -1724,9 +1741,13 @@
       if (type === 'positive') {
         submitBtn.textContent = 'UPLIFT MY DAY';
         submitBtn.className = 'action-button lift';
+        document.body.classList.add('lift-mode');
+        document.body.classList.remove('zing-mode');
       } else {
         submitBtn.textContent = 'ROAST AWAY';
         submitBtn.className = 'action-button zing';
+        document.body.classList.add('zing-mode');
+        document.body.classList.remove('lift-mode');
       }
     }
 
