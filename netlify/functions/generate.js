@@ -1,3 +1,5 @@
+// generate.js — Enforces sharper, shorter roast tone for ZINGs
+
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
@@ -18,9 +20,11 @@ exports.handler = async function(event, context) {
 
   try {
     const data = JSON.parse(event.body || '{}');
-    const { name = 'Someone', gender, mood = '', type, intensity = 'medium' } = data;
-    const userMood = mood.toLowerCase();
-    const tone = (type === 'lift' || type === 'positive') ? 'Uplift' : 'Roast';
+    const { name, gender, mood, type, intensity } = data;
+    const userMood = (mood || '').toLowerCase();
+    const displayName = name || 'Someone';
+    const tone = type === 'positive' || type === 'lift' ? 'Uplift' : 'Roast';
+    const level = intensity || 'medium';
 
     const isHarmful = /suicide|kill myself|cutting|self harm|hurt myself|hurt others|end my life|die|kill someone|take my life/i;
     if (isHarmful.test(userMood)) {
@@ -29,69 +33,71 @@ exports.handler = async function(event, context) {
         headers,
         body: JSON.stringify({
           message: `It sounds like you're going through something heavy — and that's okay. You're not alone. If you're in crisis, please consider reaching out:\n\n- 🌍 International: https://www.befrienders.org\n- 🇺🇸 US: https://988lifeline.org\n- 🇬🇧 UK: https://samaritans.org\n\nTake a breath. You matter. ❤️`,
-          title: 'LET’S TAKE A MOMENT',
+          title: 'Let’s take a moment',
           source: 'safety-check'
         })
       };
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) return fallback(name, tone, headers);
+    if (!apiKey) {
+      return fallback('Missing API key', data, headers);
+    }
 
-    const models = ['mistralai/mistral-7b-instruct:free', 'gryphe/mythomax-l2:free'];
-    const model = models[Math.floor(Math.random() * models.length)];
+    const roastInstructions = `Write a short, funny roast for someone named ${displayName}${gender ? ` (${gender})` : ''} who is feeling: "${userMood}".\n
+- Keep it punchy, playful, and sarcastic.\n- Must be no more than 4 lines.\n- Think: clever comedy roast, Gen Z memes, no cheesy flattery.\n- Avoid over-the-top praise or metaphors like 'sunsets' or 'supernovas'.\n- Include hashtags or emojis only if they elevate the roast.`;
 
-    const prompt = `Write a short ${tone.toLowerCase()} message (max 4 lines) for ${name}${gender ? ` (${gender})` : ''}, based on: "${mood}". Make it ${intensity} in tone. Avoid long intros and get to the punchline quickly.`;
+    const upliftInstructions = `Write a short, uplifting message for someone named ${displayName}${gender ? ` (${gender})` : ''} who is feeling: "${userMood}".\n
+- Keep it real and warm.\n- No more than 4 lines.\n- Friendly, modern tone.\n- Avoid clichés.`;
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const prompt = tone === 'Roast' ? roastInstructions : upliftInstructions;
+
+    const model = Math.random() > 0.5 ? 'mistralai/mistral-7b-instruct:free' : 'gryphe/mythomax-l2-13b:free';
+
+    const response = await fetch(`https://openrouter.ai/api/v1/chat/completions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model,
-        messages: [
-          { role: 'system', content: 'You are a personality generator for a surprise door website. Replies must be 4 lines max and very engaging.' },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 120,
-        temperature: 0.9
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.9,
+        max_tokens: 120
       })
     });
 
-    const json = await response.json();
-    const raw = json?.choices?.[0]?.message?.content?.trim();
-    const final = raw ? raw.replace(/^"|"$/g, '').trim() : null;
+    const result = await response.json();
+    const message = result.choices?.[0]?.message?.content?.trim();
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        message: final || fallback(name, tone).body.message,
+        message: message || fallbackMessage(data),
         title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
-        source: final ? 'openrouter' : 'fallback'
+        source: result.id ? 'ai' : 'fallback'
       })
     };
-  } catch (err) {
-    console.error('Error:', err.message);
-    return fallback('there', 'Uplift', headers);
+
+  } catch (error) {
+    return fallback(error.message, {}, headers);
   }
 };
 
-function fallback(name, tone, headers = {
-  'Access-Control-Allow-Origin': '*',
-  'Content-Type': 'application/json'
-}) {
-  const safe = tone === 'Uplift'
-    ? `Hey ${name}, even when things glitch, you're still amazing. Try again in a moment.`
-    : `${name}, we tried to roast you but the fire fizzled out. Try again for some real spice.`;
+function fallbackMessage(data) {
+  return `Hey ${data.name || 'there'}, even when things glitch, you're still amazing. Try again in a moment.`;
+}
+
+function fallback(msg, data, headers) {
+  console.log('Fallback:', msg);
   return {
     statusCode: 200,
     headers,
     body: JSON.stringify({
-      message: safe,
-      title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
+      message: fallbackMessage(data),
+      title: data?.type === 'positive' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
       source: 'fallback'
     })
   };
