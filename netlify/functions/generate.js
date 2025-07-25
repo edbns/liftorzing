@@ -8,76 +8,41 @@ exports.handler = async function(event, context) {
     'Content-Type': 'application/json'
   };
 
-  // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
 
   if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method Not Allowed' })
-    };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
   try {
     const data = JSON.parse(event.body || '{}');
-    const { name, gender, mood, type, intensity } = data;
-    const displayName = name || 'someone';
-    const tone = type === 'positive' || type === 'lift' ? 'Uplift' : 'Roast';
-    const level = intensity || 'medium';
-    const safeMood = (mood || '').toLowerCase();
+    const { name = 'Someone', gender, mood = '', type, intensity = 'medium' } = data;
+    const userMood = mood.toLowerCase();
+    const tone = (type === 'lift' || type === 'positive') ? 'Uplift' : 'Roast';
 
-    // 1. Harmful input filter
     const isHarmful = /suicide|kill myself|cutting|self harm|hurt myself|hurt others|end my life|die|kill someone|take my life/i;
-    if (isHarmful.test(safeMood)) {
+    if (isHarmful.test(userMood)) {
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
-          message: `It sounds like you're going through something heavy — and that's okay. You're not alone. If you're in crisis, please consider reaching out:\n\n🌍 https://www.befrienders.org\n🇺🇸 https://988lifeline.org\n🇬🇧 https://samaritans.org\n\nTake a breath. You matter. ❤️`,
+          message: `It sounds like you're going through something heavy — and that's okay. You're not alone. If you're in crisis, please consider reaching out:\n\n- 🌍 International: https://www.befrienders.org\n- 🇺🇸 US: https://988lifeline.org\n- 🇬🇧 UK: https://samaritans.org\n\nTake a breath. You matter. ❤️`,
           title: 'LET’S TAKE A MOMENT',
           source: 'safety-check'
         })
       };
     }
 
-    // 2. Fallback if no API key
     const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) {
-      const fallback = `Hey ${displayName}, even when things glitch, you're still amazing. Try again in a moment.`;
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          message: fallback,
-          title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
-          source: 'fallback'
-        })
-      };
-    }
+    if (!apiKey) return fallback(name, tone, headers);
 
-    // 3. Randomly pick model
-    const models = [
-      'mistralai/mistral-7b-instruct:free',
-      'gryphe/mythomax-l2-13b:free'
-    ];
-    const selectedModel = models[Math.floor(Math.random() * models.length)];
+    const models = ['mistralai/mistral-7b-instruct:free', 'gryphe/mythomax-l2:free'];
+    const model = models[Math.floor(Math.random() * models.length)];
 
-    // 4. Prompt flavors
-    const flavors = [
-      'Make it clever, short, and entertaining — avoid clichés.',
-      'Use a poetic tone, but limit to 4 lines max.',
-      'Casual Gen-Z tone, punchy, no emojis.',
-      'Bold and playful — short roast or hype line.',
-      'Make it sound like a mystical prophecy — but short!'
-    ];
-    const flavor = flavors[Math.floor(Math.random() * flavors.length)];
+    const prompt = `Write a short ${tone.toLowerCase()} message (max 4 lines) for ${name}${gender ? ` (${gender})` : ''}, based on: "${mood}". Make it ${intensity} in tone. Avoid long intros and get to the punchline quickly.`;
 
-    const prompt = `You're a personality generator AI.\n\nUser name: ${displayName}${gender ? ` (${gender})` : ''}\nTone: ${tone}\nMood: "${mood || 'unknown'}"\nIntensity: ${level}\n\n${flavor}\n\nResponse must be maximum **4 lines** and ready to display as a shareable card.`;
-
-    // 5. OpenRouter call
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -85,41 +50,49 @@ exports.handler = async function(event, context) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: selectedModel,
+        model,
         messages: [
-          { role: 'system', content: 'You are a witty personality generator for short uplifting or roast messages.' },
+          { role: 'system', content: 'You are a personality generator for a surprise door website. Replies must be 4 lines max and very engaging.' },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 100,
-        temperature: 0.85
+        max_tokens: 120,
+        temperature: 0.9
       })
     });
 
-    const result = await response.json();
-    const generated = result?.choices?.[0]?.message?.content?.trim();
-
-    if (!generated) {
-      throw new Error('No content returned');
-    }
+    const json = await response.json();
+    const raw = json?.choices?.[0]?.message?.content?.trim();
+    const final = raw ? raw.replace(/^"|"$/g, '').trim() : null;
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        message: generated,
+        message: final || fallback(name, tone).body.message,
         title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
-        source: 'openrouter'
+        source: final ? 'openrouter' : 'fallback'
       })
     };
   } catch (err) {
-    console.error('Error in generate.js:', err);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({
-        error: 'Internal Server Error',
-        details: err.message
-      })
-    };
+    console.error('Error:', err.message);
+    return fallback('there', 'Uplift', headers);
   }
 };
+
+function fallback(name, tone, headers = {
+  'Access-Control-Allow-Origin': '*',
+  'Content-Type': 'application/json'
+}) {
+  const safe = tone === 'Uplift'
+    ? `Hey ${name}, even when things glitch, you're still amazing. Try again in a moment.`
+    : `${name}, we tried to roast you but the fire fizzled out. Try again for some real spice.`;
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      message: safe,
+      title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
+      source: 'fallback'
+    })
+  };
+}
