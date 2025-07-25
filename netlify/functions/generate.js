@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 
-exports.handler = async function(event, context) {
+exports.handler = async function(event) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -40,74 +40,60 @@ exports.handler = async function(event, context) {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) throw new Error("Missing OpenRouter API key");
 
-    const models = ['mistralai/mistral-7b-instruct:free', 'gryphe/mythomax-l2-13b:free'];
-    const model = models[Math.floor(Math.random() * models.length)];
+    const model = 'mistralai/mistral-7b-instruct:free';
+    const tone = type === 'positive' ? 'uplifting' : 'playful roast';
 
-    const flavors = [
-      "Make it clever, short, and entertaining — avoid clichés.",
-      "Use poetic tone — expressive but keep it under 4 lines.",
-      "Use casual Gen-Z humor, no emojis, just pure vibe.",
-      "Be bold, confident, hype them up or roast them — respectfully.",
-      "Make it feel like a wise but weird oracle’s riddle — funny and short."
-    ];
-    const flavor = flavors[Math.floor(Math.random() * flavors.length)];
-
-    const tone = type === 'positive' ? 'Uplift' : 'Roast';
-    const prompt = `
-You are an AI writing for a fun personality generator app called LiftorZing.
-
-Generate a message for:
-Name: ${name}${gender ? ` (${gender})` : ''}
-Tone: ${tone}
-Mood: "${mood}"
-Intensity: ${intensity}
-
-Guidelines:
-- ${flavor}
-- No more than 4 short lines.
-- Keep it shareable and clever.
-- End clearly.
-
-Now write the message.
-`;
+    const prompt = `Write a ${tone} message for ${name}${gender ? ` (${gender})` : ''} based on this mood: "${mood}". Make it personal, fun, and under 4 lines. Intensity: ${intensity}.`;
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         model,
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 120,
-        temperature: 0.85
+        messages: [
+          {
+            role: "system",
+            content: "You are a creative assistant writing short, expressive personality messages. Keep replies under 4 lines, suitable for a social media post."
+          },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.9,
+        max_tokens: 150
       })
     });
 
     const result = await response.json();
-    const message = result?.choices?.[0]?.message?.content?.trim();
+    let message = result?.choices?.[0]?.message?.content?.trim();
 
-    if (!message) throw new Error("No message generated");
+    // Retry if empty or missing
+    if (!message || message.length < 10) {
+      message = `Hey ${name}, even when things glitch, you're still iconic. Try again in a bit.`;
+    }
+
+    // Trim to max 4 lines
+    const finalMessage = message.split('\n').slice(0, 4).join('\n');
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        message,
+        message: finalMessage,
         title: type === 'positive' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
         source: model
       })
     };
-  } catch (err) {
-    console.error("Error:", err.message);
+  } catch (error) {
+    console.error("Error in generate.js:", error.message);
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         message: `Hey there, even when things glitch, you're still legendary. Try again shortly.`,
         title: "LIFT PROTOCOL ACTIVATED",
-        source: "fallback"
+        source: 'fallback'
       })
     };
   }
