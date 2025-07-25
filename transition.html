@@ -247,8 +247,8 @@
       function typeWriterEffect() {
         if (currentLineIndex >= chosenSet.length) {
           // Typing complete, apply effects then redirect
-          setTimeout(applyGlitchEffect, 150); // faster
-          setTimeout(finalGlitchAndRedirect, 1200); // faster
+          setTimeout(applyGlitchEffect, 350); // faster
+          setTimeout(finalGlitchAndRedirect, 1800); // faster
           return;
         }
 
@@ -266,10 +266,10 @@
           currentLineIndex++;
           currentCharIndex = 0;
           // Pause at end of line - even faster (60ms)
-          setTimeout(typeWriterEffect, 60);
+          setTimeout(typeWriterEffect, 120);
         } else {
           // Continue typing current line - even faster (18ms per character)
-          setTimeout(typeWriterEffect, 18);
+          setTimeout(typeWriterEffect, 36);
         }
       }
       
@@ -316,8 +316,8 @@
             const door = document.querySelector('.door, .mystery-door, .mystery-door-container');
             if (door) door.style.display = 'none';
             window.location.href = 'index.html';
-          }, 400); // faster
-        }, 150);
+          }, 800); // faster
+        }, 350);
       }, 200);
     }
   </script>
