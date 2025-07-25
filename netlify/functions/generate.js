@@ -41,14 +41,14 @@ exports.handler = async function (event) {
     if (!apiKey) throw new Error('Missing OpenRouter API key');
 
     const model = 'mistralai/mistral-7b-instruct:free';
-    const tone = type === 'positive' ? 'uplifting' : 'roast';
+    const tone = type === 'positive' ? 'uplift' : 'roast';
 
     const systemMessage =
       type === 'positive'
-        ? "You're a motivational coach. Create a personal, emotionally supportive message in under 4 lines. Make it feel sincere and inspiring, not generic."
-        : "You're a roast master with a sharp tongue. Write a creative, disrespectfully respectful roast. Keep it funny, 2–4 lines max, clever, and postable on social media. Think mean tweet meets stand-up comedy.";
+        ? "You're a motivational life coach. Write a personal, emotionally supportive message in under 4 lines. Make it real, not generic."
+        : "You're a savage roast bot. Write brutally honest, clever, and funny insults. Go hard but never cruel. The tone is comedic, disrespectfully respectful, and built for viral social media posts. Don’t sugarcoat it.";
 
-    const prompt = `${name}${gender ? ` (${gender})` : ''} is feeling: "${mood}". Craft a personalized ${tone} message. Intensity: ${intensity}.`;
+    const prompt = `${name}${gender ? ` (${gender})` : ''} said: "${mood}". Craft a personalized ${tone} message. Intensity: ${intensity}.`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -70,11 +70,13 @@ exports.handler = async function (event) {
     const result = await response.json();
     let message = result?.choices?.[0]?.message?.content?.trim();
 
+    // fallback if message is empty
     if (!message || message.length < 10) {
-      message = `Hey ${name}, even when things glitch, you're still iconic. Try again soon.`;
+      message = `Hey ${name}, even when things glitch, you're still iconic. Try again shortly.`;
     }
 
-    const finalMessage = message.split('\n').slice(0, 4).join('\n');
+    // ✅ Trim to max 4 lines for export
+    const finalMessage = message.split('\n').slice(0, 4).join('\n').trim();
 
     return {
       statusCode: 200,
