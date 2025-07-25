@@ -1270,6 +1270,46 @@
       }
     }
   </style>
+  <style>
+    /* ...existing styles... */
+    #image-modal #image-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    #image-modal #image-options button {
+      width: 100%;
+      margin: 0;
+      padding: 16px 12px;
+      font-size: 1rem;
+      background: #f8f8f8;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    #image-modal #image-options button:hover {
+      background: #e8e8e8;
+      border-color: #000;
+    }
+    #download-content-btn {
+      margin-top: 20px;
+      padding: 14px;
+      background: black;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: bold;
+      width: 100%;
+      font-size: 16px;
+      display: block;
+    }
+  </style>
 </head>
 <body class="home-page">
 
@@ -1382,13 +1422,6 @@
                 <polyline points="21,15 16,10 5,21"></polyline>
               </svg>
               Static Image
-            </button>
-            <button id="animated-btn" onclick="setFormatType('animated')" style="padding: 8px 16px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'JetBrains Mono', monospace;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px;">
-                <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-              </svg>
-              Animated Video
             </button>
           </div>
         </div>
@@ -2126,7 +2159,6 @@
     function setFormatType(type) {
       currentFormatType = type;
       document.getElementById('static-btn').style.background = type === 'static' ? 'black' : '#666';
-      document.getElementById('animated-btn').style.background = type === 'animated' ? 'black' : '#666';
       
       // Update modal title
       const title = document.getElementById('modal-title');
@@ -2179,6 +2211,31 @@
           previewContainer.style.display = 'block';
           generatePreviewImage(document.getElementById('preview-canvas'), format);
           window.selectedFormat = format;
+          window.selectedPlatform = platform;
+          // Show download button
+          let downloadBtn = document.getElementById('download-content-btn');
+          if (!downloadBtn) {
+            downloadBtn = document.createElement('button');
+            downloadBtn.id = 'download-content-btn';
+            downloadBtn.textContent = 'Download';
+            downloadBtn.onclick = function() {
+              closeImageModal();
+              // Get color values
+              const bgColor = document.getElementById('bg-color').value;
+              const textColor = document.getElementById('text-color').value;
+              const borderColor = document.getElementById('border-color').value;
+              const cursorColor = document.getElementById('cursor-color').value;
+              const colorOptions = {
+                background: bgColor,
+                text: textColor,
+                border: borderColor,
+                cursor: cursorColor
+              };
+              generateAndDownloadImage(window.selectedPlatform, window.selectedFormat, colorOptions);
+            };
+            optionsContainer.appendChild(downloadBtn);
+          }
+          downloadBtn.style.display = 'block';
         };
         optionsContainer.appendChild(button);
       });
