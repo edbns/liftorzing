@@ -346,6 +346,9 @@
       transform-origin: center center;
       background: linear-gradient(135deg, #000000 0%, #333333 100%);
       color: white;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-sizing: border-box;
     }
     
     #message-container {
@@ -1252,6 +1255,21 @@
       color: #00ff00 !important;
     }
   </style>
+  <style>
+    /* ...existing styles... */
+    #form-container {
+      max-height: 90vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      #form-container {
+        max-height: 98vh;
+        overflow-y: auto;
+        box-sizing: border-box;
+      }
+    }
+  </style>
 </head>
 <body class="home-page">
 
@@ -2139,158 +2157,32 @@
       const previewContainer = document.getElementById('preview-container');
       
       // Set title
-      title.textContent = `${platform.charAt(0).toUpperCase() + platform.slice(1)} ${currentFormatType === 'static' ? 'Image' : 'Video'} Options`;
+      title.textContent = `${platform.charAt(0).toUpperCase() + platform.slice(1)} Image Options`;
       
-      // Reset format type buttons
-      document.getElementById('static-btn').style.background = 'black';
-      document.getElementById('animated-btn').style.background = '#666';
-      document.getElementById('static-btn').style.color = 'white';
-      document.getElementById('animated-btn').style.color = 'white';
+      // Only show static image
       currentFormatType = 'static';
-      
-      // Check if color inputs exist before setting values
-      const bgColor = document.getElementById('bg-color');
-      const textColor = document.getElementById('text-color');
-      const borderColor = document.getElementById('border-color');
-      const cursorColor = document.getElementById('cursor-color');
-      
-      // Init color inputs with default values
-      if (bgColor) bgColor.value = '#ffffff';
-      if (textColor) textColor.value = '#000000';
-      if (borderColor) borderColor.value = '#000000';
-      if (cursorColor) cursorColor.value = '#000000';
-      
-      // Initially hide preview container if it exists
-      if (previewContainer) previewContainer.style.display = 'none';
       
       // Clear options container
       optionsContainer.innerHTML = '';
       
-      // Create format buttons
-      imageFormats[platform].forEach(format => {
+      // Filter formats to only 1:1 and 16:9
+      const allowedFormats = (imageFormats[platform] || []).filter(f => {
+        const ratio = f.width / f.height;
+        return (Math.abs(ratio - 1) < 0.01) || (Math.abs(ratio - 16/9) < 0.01) || (Math.abs(ratio - 9/16) < 0.01) || (Math.abs(ratio - 1920/1080) < 0.01) || (Math.abs(ratio - 1080/1920) < 0.01);
+      });
+      
+      allowedFormats.forEach(format => {
         const button = document.createElement('button');
-        button.innerHTML = `
-          <div style="text-align: left;">
-            <strong>${format.name}</strong> (${format.width}×${format.height})
-            <br><small style="color: #666;">${format.desc}</small>
-          </div>
-        `;
-        button.style.cssText = `
-          padding: 15px; 
-          background: #f8f8f8; 
-          border: 2px solid #ddd; 
-          border-radius: 8px; 
-          cursor: pointer; 
-          font-family: 'JetBrains Mono', monospace;
-          width: 100%;
-          transition: all 0.3s ease;
-        `;
-        
-        button.onmouseover = () => {
-          button.style.background = '#e8e8e8';
-          button.style.borderColor = '#000';
-        };
-        button.onmouseout = () => {
-          button.style.background = '#f8f8f8';
-          button.style.borderColor = '#ddd';
-        };
-        
-        // Show preview before download
-        button.onclick = () => {
-          // Save selected format for later use
-          window.selectedFormat = format;
-          window.selectedPlatform = platform;
-          
-          // Show the preview container
+        button.innerHTML = `<div style="text-align: left;"><strong>${format.name}</strong> (${format.width}×${format.height})<br><small style="color: #666;">${format.desc}</small></div>`;
+        button.className = 'share-menu-btn';
+        button.onclick = function() {
           previewContainer.style.display = 'block';
-          
-          // Setup preview canvas
-          const previewCanvas = document.getElementById('preview-canvas');
-          previewCanvas.width = format.width;
-          previewCanvas.height = format.height;
-          
-          // Set max width for preview
-          const maxPreviewWidth = Math.min(400, document.getElementById('image-modal').offsetWidth - 100);
-          const aspectRatio = format.height / format.width;
-          previewCanvas.style.width = maxPreviewWidth + 'px';
-          previewCanvas.style.height = (maxPreviewWidth * aspectRatio) + 'px';
-          
-          // Show loading indicator
-          document.getElementById('preview-loading').style.display = 'flex';
-          
-          // Generate preview based on format type
-          if (currentFormatType === 'static') {
-            generatePreviewImage(previewCanvas, format);
-          } else {
-            generatePreviewVideo(previewCanvas, format);
-          }
+          generatePreviewImage(document.getElementById('preview-canvas'), format);
+          window.selectedFormat = format;
         };
-        
         optionsContainer.appendChild(button);
       });
       
-      // Set up update preview button event
-      document.getElementById('update-preview-btn').onclick = () => {
-        if (window.selectedFormat) {
-          // Show loading indicator
-          document.getElementById('preview-loading').style.display = 'flex';
-          
-          const previewCanvas = document.getElementById('preview-canvas');
-          if (currentFormatType === 'static') {
-            generatePreviewImage(previewCanvas, window.selectedFormat);
-          } else {
-            generatePreviewVideo(previewCanvas, window.selectedFormat);
-          }
-        }
-      };
-      
-      // Add download button at the bottom
-      const downloadBtn = document.createElement('button');
-      downloadBtn.textContent = 'Download';
-      downloadBtn.id = 'download-content-btn';
-      downloadBtn.style.cssText = `
-        margin-top: 20px;
-        padding: 14px;
-        background: black;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: bold;
-        width: 100%;
-        font-size: 16px;
-        display: none;
-      `;
-      
-      downloadBtn.onclick = () => {
-        closeImageModal();
-        
-        // Get color values
-        const bgColor = document.getElementById('bg-color').value;
-        const textColor = document.getElementById('text-color').value;
-        const borderColor = document.getElementById('border-color').value;
-        const cursorColor = document.getElementById('cursor-color').value;
-        
-        // Create color options object
-        const colorOptions = {
-          background: bgColor,
-          text: textColor,
-          border: borderColor,
-          cursor: cursorColor
-        };
-        
-        // Generate with selected format and colors
-        if (currentFormatType === 'static') {
-          generateAndDownloadImage(window.selectedPlatform, window.selectedFormat, colorOptions);
-        } else {
-          generateAndDownloadVideo(window.selectedPlatform, window.selectedFormat, colorOptions);
-        }
-      };
-      
-      optionsContainer.appendChild(downloadBtn);
-      
-      // Show modal
       modal.style.display = 'flex';
     }
     
@@ -2543,24 +2435,6 @@
         ctx.textAlign = 'center';
         ctx.fillStyle = colors.text === '#ffffff' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)';
         ctx.fillText('Generated by Lift or Zing', width / 2, footerY - (footerFontSize * 0.3));
-        
-        // Add "Generated by Lift or Zing" at bottom with better positioning
-        ctx.font = `${footerFontSize}px Arial, sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#666666';
-        const footerY2 = canvas.height - (height * 0.05); // Proportional footer positioning
-        
-        // Add subtle divider line for square formats (1:1 ratio)
-        if (Math.abs(width - height) < 20) { // Check if it's close to square format
-          ctx.beginPath();
-          ctx.strokeStyle = '#dddddd';
-          ctx.lineWidth = 1;
-          ctx.moveTo(width * 0.1, footerY2 - footerFontSize * 1.5);
-          ctx.lineTo(width * 0.9, footerY2 - footerFontSize * 1.5);
-          ctx.stroke();
-        }
-        
-        ctx.fillText('Generated by Lift or Zing', canvas.width / 2, footerY2);
         
         // Convert to blob
         canvas.toBlob(resolve, 'image/jpeg', 0.9);
@@ -3368,26 +3242,52 @@
       
       // Show Try Again button only if message is 'Oops, nothing came through.'
       if (message.trim() === 'Oops, nothing came through.') {
+        const retryDiv = document.createElement('div');
+        retryDiv.style.display = 'flex';
+        retryDiv.style.flexDirection = 'column';
+        retryDiv.style.alignItems = 'center';
+        retryDiv.style.justifyContent = 'center';
+        retryDiv.style.marginTop = '32px';
+        // Icon button
         const retryBtn = document.createElement('button');
         retryBtn.id = 'retry-btn';
-        retryBtn.textContent = 'Try Again';
-        retryBtn.className = 'action-button';
-        retryBtn.style.marginTop = '30px';
+        retryBtn.style.background = 'none';
+        retryBtn.style.border = 'none';
+        retryBtn.style.cursor = 'pointer';
+        retryBtn.style.padding = '0';
+        retryBtn.style.display = 'flex';
+        retryBtn.style.flexDirection = 'column';
+        retryBtn.style.alignItems = 'center';
+        retryBtn.style.justifyContent = 'center';
+        retryBtn.style.outline = 'none';
+        retryBtn.innerHTML = `<img src='reload.png' alt='Try Again' style='width:48px;height:48px;display:block;margin-bottom:8px;' />`;
+        // Label
+        const label = document.createElement('div');
+        label.textContent = 'Try Again';
+        label.style.color = 'white';
+        label.style.fontFamily = "'JetBrains Mono', monospace";
+        label.style.fontSize = '1.1rem';
+        label.style.marginTop = '2px';
+        label.style.letterSpacing = '1px';
+        label.style.textAlign = 'center';
+        retryDiv.appendChild(retryBtn);
+        retryDiv.appendChild(label);
         retryBtn.onclick = function() {
-          // Reuse last form data
           if (window.lastFormData) {
             retryBtn.disabled = true;
-            retryBtn.textContent = 'Retrying...';
-            // Show loading
+            retryBtn.style.opacity = '0.6';
+            label.textContent = 'Retrying...';
             messageTitle.innerHTML = 'PROCESSING...';
             messageContent.innerHTML = `<div style='text-align:center;padding:40px 20px;'><div style='font-size:2rem;margin-bottom:20px;'>⚡</div><div style='font-size:1.2rem;margin-bottom:10px;'>Generating your personalized message...</div></div>`;
-            // Call backend again
             fetch(window.lastFormData.apiUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(window.lastFormData.requestData)
             })
-            .then(r => r.json())
+            .then(response => {
+              if (!response.ok) throw new Error('API error');
+              return response.json();
+            })
             .then(data => {
               if (data.error) {
                 generateLocalMessage(window.lastFormData.requestData.name, window.lastFormData.requestData.gender, window.lastFormData.requestData.mood, window.lastFormData.requestData.intensity, window.lastFormData.requestData.photoFile);
@@ -3400,7 +3300,7 @@
             });
           }
         };
-        messageContent.appendChild(retryBtn);
+        messageContent.appendChild(retryDiv);
       }
     }
     

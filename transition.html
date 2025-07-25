@@ -228,6 +228,9 @@
         surpriseMessage.style.opacity = "0";
         setTimeout(() => {
           surpriseMessage.style.display = "none";
+          // Hide/remove any door element before showing the form
+          const door = document.querySelector('.door, .mystery-door, .mystery-door-container');
+          if (door) door.style.display = 'none';
           output.style.display = "block";
           startTerminalAnimation();
         }, 500);
