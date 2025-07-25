@@ -1,6 +1,5 @@
-
-   <!DOCTYPE html>
-   <html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-T2SWTK7R02"></script>
@@ -1622,6 +1621,15 @@
         
         // Wait for transition to complete before hiding elements
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           shareMenu.style.display = 'none';
           shareMenuOverlay.style.display = 'none';
           document.body.style.overflow = ''; // Restore body scrolling
@@ -1642,24 +1650,22 @@
     });
     
     // Check URL parameters on page load
-    function showFormIfNeeded() {
-     const showForm = sessionStorage.getItem('showForm');
-     const formType = sessionStorage.getItem('formType');
-     if (showForm === 'true' && (formType === 'lift' || formType === 'zing')) {
-       document.getElementById('container').style.display = 'none';
-       formContainer.style.display = 'block';
-       document.body.classList.remove('home-page');
-       document.querySelectorAll('.home-only').forEach(element => {
-         element.style.display = 'none';
-       });
-       currentType = formType === 'lift' ? 'positive' : 'funny';
-       updateFormForType(currentType);
-       sessionStorage.removeItem('showForm');
-       sessionStorage.removeItem('formType');
-     }
-   }
-   document.addEventListener('DOMContentLoaded', showFormIfNeeded);
-   window.onload = showFormIfNeeded;
+    document.addEventListener('DOMContentLoaded', () => {
+      // Option 2: Use sessionStorage for form state
+      const showForm = sessionStorage.getItem('showForm');
+      const formType = sessionStorage.getItem('formType');
+      if (showForm === 'true' && (formType === 'lift' || formType === 'zing')) {
+        document.getElementById('container').style.display = 'none';
+        currentType = formType === 'lift' ? 'positive' : 'funny';
+        formContainer.style.display = 'block';
+        document.body.classList.remove('home-page');
+        document.querySelectorAll('.home-only').forEach(element => {
+          element.style.display = 'none';
+        });
+        updateFormForType(currentType);
+        sessionStorage.removeItem('showForm');
+        sessionStorage.removeItem('formType');
+        return;
       }
       // (Optional) fallback: legacy query string support (if needed)
       // ... existing code for query string, or remove if not needed ...
@@ -1668,7 +1674,16 @@
     // Audio effects setup
     // Sound effects removed
     
-
+    const typingOutput = document.getElementById('typing-output');
+    const overlay = document.getElementById('overlay');
+    const formContainer = document.getElementById('form-container');
+    const messageContainer = document.getElementById('message-container');
+    const messageTitle = document.getElementById('message-title');
+    const messageContent = document.getElementById('message-content');
+    const cursor = document.getElementById('cursor');
+    const submitBtn = document.getElementById('submit-btn');
+    let currentType = '';
+    let selectedIntensity = 'mild';
 
     // Input method switching
     let currentInputMethod = 'text';
@@ -1727,6 +1742,15 @@
         reader.readAsDataURL(file);
         // Scroll form into view for mobile/small screens
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           const form = document.getElementById('form-container');
           if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 200);
@@ -1798,6 +1822,15 @@
       typeLine(typingContent, 30, () => {
         // When typing is complete, transition to the form
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           overlay.style.display = 'none';
           formContainer.style.display = 'block';
           // Logo removed
@@ -1829,6 +1862,15 @@
       formContainer.style.animation = 'fadeIn 0.4s ease forwards reverse';
       
       setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
         formContainer.style.display = 'none';
         
         // Logo removed
@@ -1869,6 +1911,15 @@
       messageContainer.style.animation = 'slideInRight 0.4s ease forwards reverse';
       
       setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
         messageContainer.style.display = 'none';
         
         // Logo removed
@@ -2911,6 +2962,15 @@
         
         // Clean up after short delay
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
           document.body.removeChild(loadingMsg);
@@ -2929,6 +2989,15 @@
         
         // Timeout fallback in case recording doesn't start
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           if (!recordingStarted) {
             document.body.removeChild(loadingMsg);
             alert('Video recording failed to start. Please try again or use static image instead.');
@@ -2947,6 +3016,15 @@
       animateTypewriterEffect(canvas, ctx, format, colorOptions).then(() => {
         // Stop recording after animation completes with extra buffer time
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           if (mediaRecorder.state === 'recording') {
             try {
               mediaRecorder.stop();
@@ -3284,6 +3362,15 @@
       formContainer.style.opacity = '0';
       
       setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
         formContainer.style.display = 'none';
         
         // Show message container with loading
@@ -4087,6 +4174,15 @@
         
         // Wait for transition to complete before hiding elements
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           shareMenu.style.display = 'none';
           shareMenuOverlay.style.display = 'none';
           document.body.style.overflow = ''; // Restore body scrolling
@@ -4199,6 +4295,15 @@
         reader.readAsDataURL(file);
         // Scroll form into view for mobile/small screens
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           const form = document.getElementById('form-container');
           if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 200);
@@ -4270,6 +4375,15 @@
       typeLine(typingContent, 30, () => {
         // When typing is complete, transition to the form
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           overlay.style.display = 'none';
           formContainer.style.display = 'block';
           // Logo removed
@@ -4301,6 +4415,15 @@
       formContainer.style.animation = 'fadeIn 0.4s ease forwards reverse';
       
       setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
         formContainer.style.display = 'none';
         
         // Logo removed
@@ -4341,6 +4464,15 @@
       messageContainer.style.animation = 'slideInRight 0.4s ease forwards reverse';
       
       setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
         messageContainer.style.display = 'none';
         
         // Logo removed
@@ -5383,6 +5515,15 @@
         
         // Clean up after short delay
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
           document.body.removeChild(loadingMsg);
@@ -5401,6 +5542,15 @@
         
         // Timeout fallback in case recording doesn't start
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           if (!recordingStarted) {
             document.body.removeChild(loadingMsg);
             alert('Video recording failed to start. Please try again or use static image instead.');
@@ -5419,6 +5569,15 @@
       animateTypewriterEffect(canvas, ctx, format, colorOptions).then(() => {
         // Stop recording after animation completes with extra buffer time
         setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
           if (mediaRecorder.state === 'recording') {
             try {
               mediaRecorder.stop();
@@ -5756,6 +5915,15 @@
       formContainer.style.opacity = '0';
       
       setTimeout(() => {
+  const doorText = document.querySelector('.door-message');
+  if (doorText) doorText.style.opacity = '1';
+}, 1200);
+
+setTimeout(() => {
+  const door = document.querySelector('.door-container');
+  const form = document.querySelector('.form-container');
+  if (door) door.style.display = 'none';
+  if (form) form.style.display = 'flex';
         formContainer.style.display = 'none';
         
         // Show message container with loading
