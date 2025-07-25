@@ -4184,6 +4184,26 @@ setTimeout(() => {
   </div>
 
   <script>
+    const formContainer = document.getElementById('form-container');
+let currentType = '';
+function showFormIfNeeded() {
+  const showForm = sessionStorage.getItem('showForm');
+  const formType = sessionStorage.getItem('formType');
+  if (showForm === 'true' && (formType === 'lift' || formType === 'zing')) {
+    document.getElementById('container').style.display = 'none';
+    formContainer.style.display = 'block';
+    document.body.classList.remove('home-page');
+    document.querySelectorAll('.home-only').forEach(element => {
+      element.style.display = 'none';
+    });
+    currentType = formType === 'lift' ? 'positive' : 'funny';
+    updateFormForType(currentType);
+    sessionStorage.removeItem('showForm');
+    sessionStorage.removeItem('formType');
+  }
+}
+document.addEventListener('DOMContentLoaded', showFormIfNeeded);
+window.onload = showFormIfNeeded;
     // Share Menu Functionality
     document.addEventListener('DOMContentLoaded', function() {
       const mainShareButton = document.getElementById('main-share-button');
@@ -4263,22 +4283,7 @@ setTimeout(() => {
     });
     
     // Check URL parameters on page load
-    document.addEventListener('DOMContentLoaded', () => {
-      // Option 2: Use sessionStorage for form state
-      const showForm = sessionStorage.getItem('showForm');
-      const formType = sessionStorage.getItem('formType');
-      if (showForm === 'true' && (formType === 'lift' || formType === 'zing')) {
-        document.getElementById('container').style.display = 'none';
-        currentType = formType === 'lift' ? 'positive' : 'funny';
-        formContainer.style.display = 'block';
-        document.body.classList.remove('home-page');
-        document.querySelectorAll('.home-only').forEach(element => {
-          element.style.display = 'none';
-        });
-        updateFormForType(currentType);
-        sessionStorage.removeItem('showForm');
-        sessionStorage.removeItem('formType');
-        return;
+    
       }
       // (Optional) fallback: legacy query string support (if needed)
       // ... existing code for query string, or remove if not needed ...
