@@ -1579,6 +1579,9 @@
   <script>
     // Share Menu Functionality
     document.addEventListener('DOMContentLoaded', function() {
+      // Check if we need to show the form from transition
+      showFormIfNeeded();
+      
       const mainShareButton = document.getElementById('main-share-button');
       const shareMenu = document.getElementById('share-menu');
       const shareMenuOverlay = document.getElementById('share-menu-overlay');
