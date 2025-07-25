@@ -1,13 +1,14 @@
 const fetch = require('node-fetch');
 
-exports.handler = async function (event) {
+exports.handler = async function(event, context) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   };
 
+  // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
@@ -16,87 +17,109 @@ exports.handler = async function (event) {
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ error: 'Method Not Allowed' }),
+      body: JSON.stringify({ error: 'Method Not Allowed' })
     };
   }
 
   try {
     const data = JSON.parse(event.body || '{}');
-    const { name = 'Friend', gender, mood = '', type = 'positive', intensity = 'medium' } = data;
+    const { name, gender, mood, type, intensity } = data;
+    const displayName = name || 'someone';
+    const tone = type === 'positive' || type === 'lift' ? 'Uplift' : 'Roast';
+    const level = intensity || 'medium';
+    const safeMood = (mood || '').toLowerCase();
 
+    // 1. Harmful input filter
     const isHarmful = /suicide|kill myself|cutting|self harm|hurt myself|hurt others|end my life|die|kill someone|take my life/i;
-    if (isHarmful.test(mood.toLowerCase())) {
+    if (isHarmful.test(safeMood)) {
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
-          message: `It sounds like you're going through something heavy — and that's okay. You're not alone. If you're in crisis, please consider reaching out:\n\n🌍 International: https://www.befrienders.org\n🇺🇸 US: https://988lifeline.org\n🇬🇧 UK: https://samaritans.org\n\nTake a breath. You matter. ❤️`,
-          title: "LET’S TAKE A MOMENT",
+          message: `It sounds like you're going through something heavy — and that's okay. You're not alone. If you're in crisis, please consider reaching out:\n\n🌍 https://www.befrienders.org\n🇺🇸 https://988lifeline.org\n🇬🇧 https://samaritans.org\n\nTake a breath. You matter. ❤️`,
+          title: 'LET’S TAKE A MOMENT',
           source: 'safety-check'
-        }),
+        })
       };
     }
 
+    // 2. Fallback if no API key
     const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) throw new Error('Missing OpenRouter API key');
+    if (!apiKey) {
+      const fallback = `Hey ${displayName}, even when things glitch, you're still amazing. Try again in a moment.`;
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          message: fallback,
+          title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
+          source: 'fallback'
+        })
+      };
+    }
 
-    const model = 'mistralai/mistral-7b-instruct:free';
-    const tone = type === 'positive' ? 'uplift' : 'roast';
+    // 3. Randomly pick model
+    const models = [
+      'mistralai/mistral-7b-instruct:free',
+      'gryphe/mythomax-l2-13b:free'
+    ];
+    const selectedModel = models[Math.floor(Math.random() * models.length)];
 
-    const systemMessage =
-      type === 'positive'
-        ? "You're a motivational life coach. Write a personal, emotionally supportive message in under 4 lines. Make it real, not generic."
-        : "You're a savage roast bot. Write brutally honest, clever, and funny insults. Go hard but never cruel. The tone is comedic, disrespectfully respectful, and built for viral social media posts. Don’t sugarcoat it.";
+    // 4. Prompt flavors
+    const flavors = [
+      'Make it clever, short, and entertaining — avoid clichés.',
+      'Use a poetic tone, but limit to 4 lines max.',
+      'Casual Gen-Z tone, punchy, no emojis.',
+      'Bold and playful — short roast or hype line.',
+      'Make it sound like a mystical prophecy — but short!'
+    ];
+    const flavor = flavors[Math.floor(Math.random() * flavors.length)];
 
-    const prompt = `${name}${gender ? ` (${gender})` : ''} said: "${mood}". Craft a personalized ${tone} message. Intensity: ${intensity}.`;
+    const prompt = `You're a personality generator AI.\n\nUser name: ${displayName}${gender ? ` (${gender})` : ''}\nTone: ${tone}\nMood: "${mood || 'unknown'}"\nIntensity: ${level}\n\n${flavor}\n\nResponse must be maximum **4 lines** and ready to display as a shareable card.`;
 
+    // 5. OpenRouter call
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model,
+        model: selectedModel,
         messages: [
-          { role: 'system', content: systemMessage },
-          { role: 'user', content: prompt },
+          { role: 'system', content: 'You are a witty personality generator for short uplifting or roast messages.' },
+          { role: 'user', content: prompt }
         ],
-        temperature: 0.9,
-        max_tokens: 160,
-      }),
+        max_tokens: 100,
+        temperature: 0.85
+      })
     });
 
     const result = await response.json();
-    let message = result?.choices?.[0]?.message?.content?.trim();
+    const generated = result?.choices?.[0]?.message?.content?.trim();
 
-    // fallback if message is empty
-    if (!message || message.length < 10) {
-      message = `Hey ${name}, even when things glitch, you're still iconic. Try again shortly.`;
+    if (!generated) {
+      throw new Error('No content returned');
     }
 
-    // ✅ Trim to max 4 lines for export
-    const finalMessage = message.split('\n').slice(0, 4).join('\n').trim();
-
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        message: finalMessage,
-        title: type === 'positive' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
-        source: model,
-      }),
+        message: generated,
+        title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
+        source: 'openrouter'
+      })
     };
-  } catch (error) {
-    console.error('Error in generate.js:', error.message);
+  } catch (err) {
+    console.error('Error in generate.js:', err);
     return {
-      statusCode: 200,
+      statusCode: 500,
       headers,
       body: JSON.stringify({
-        message: `Hey there, even when things glitch, you're still legendary. Try again shortly.`,
-        title: 'LIFT PROTOCOL ACTIVATED',
-        source: 'fallback',
-      }),
+        error: 'Internal Server Error',
+        details: err.message
+      })
     };
   }
 };
