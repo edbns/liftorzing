@@ -4186,24 +4186,7 @@ function showFormIfNeeded() {
     sessionStorage.removeItem('formType');
   }
 }
-document.addEventListener('DOMContentLoaded', showFormIfNeeded);
-window.onload = showFormIfNeeded;
-    // Share Menu Functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      const mainShareButton = document.getElementById('main-share-button');
-      const shareMenu = document.getElementById('share-menu');
-      const shareMenuOverlay = document.getElementById('share-menu-overlay');
-      const closeShareMenuBtn = document.getElementById('close-share-menu');
-      
-      // Toggle share menu
-      function toggleShareMenu() {
-        if (shareMenu.classList.contains('active')) {
-          closeShareMenu();
-        } else {
-          openShareMenu();
-        }
-      }
-      
+
       // Open share menu
       function openShareMenu() {
         // Display menu and overlay before adding active class for transition
