@@ -10,7 +10,11 @@ exports.handler = async function(event, context) {
     };
 
     if (event.httpMethod === 'OPTIONS') {
-      return { statusCode: 200, headers, body: '' };
+      return {
+        statusCode: 200,
+        headers,
+        body: ''
+      };
     }
 
     if (event.httpMethod !== 'POST') {
@@ -23,12 +27,13 @@ exports.handler = async function(event, context) {
 
     const data = JSON.parse(event.body || '{}');
     const { name, gender, mood, type, intensity } = data;
-    const displayName = name || 'Someone';
-    const level = intensity || 'medium';
-    const tone = type === 'positive' || type === 'lift' ? 'Uplift' : 'Roast';
-    const userMood = (mood || '').toLowerCase();
 
-    // 🚨 Check for harmful input
+    const userMood = (mood || '').toLowerCase();
+    const displayName = name || 'Someone';
+    const tone = type === 'positive' || type === 'lift' ? 'Uplift' : 'Roast';
+    const level = intensity || 'medium';
+
+    // 🛡️ Harmful input detection
     const isHarmful = /suicide|kill myself|cutting|self harm|hurt myself|hurt others|end my life|die|kill someone|take my life/i;
     if (isHarmful.test(userMood)) {
       return {
@@ -36,27 +41,24 @@ exports.handler = async function(event, context) {
         headers,
         body: JSON.stringify({
           message: `It sounds like you're going through something heavy — and that's okay. You're not alone. If you're in crisis, please consider reaching out:\n\n- 🌍 International: https://www.befrienders.org\n- 🇺🇸 US: https://988lifeline.org\n- 🇬🇧 UK: https://samaritans.org\n\nTake a breath. You matter. ❤️`,
-          title: 'Let’s take a moment',
+          title: 'LET’S TAKE A MOMENT',
           source: 'safety-check'
         })
       };
     }
 
-    // ✅ OpenRouter API
+    // 🔐 OpenRouter API key
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      console.log('Missing OpenRouter API key.');
+      console.log('Missing OpenRouter API key');
       return generateFallbackResponse(data, headers);
     }
 
-    // 🎲 Randomly select a model
-    const models = [
-      'mistralai/mistral-7b-instruct:free',
-      'gryphe/mythomax-l2-13b:free'
-    ];
+    // 🎲 Randomly pick a model
+    const models = ['mistralai/mistral-7b-instruct', 'gryphe/mythomax-l2'];
     const selectedModel = models[Math.floor(Math.random() * models.length)];
 
-    // ✨ Add flavor prompt
+    // 🪄 Prompt flavors
     const flavors = [
       "Make it clever, short, and entertaining — avoid clichés.",
       "Use a light poetic tone — keep it uplifting and expressive.",
@@ -66,31 +68,23 @@ exports.handler = async function(event, context) {
     ];
     const flavor = flavors[Math.floor(Math.random() * flavors.length)];
 
-    const prompt = `Your task is to write a short, creative message for a personality generator app.\n\nThe user’s name is: ${displayName}${gender ? ` (${gender})` : ''}\nTone: ${tone}\nMood description: "${mood || 'unknown mood'}"\nIntensity: ${level}\n\n${flavor}`;
+    const prompt = `Your task is to write a short, creative message for a personality generator app.\n\nUser's name: ${displayName}${gender ? ` (${gender})` : ''}\nTone: ${tone}\nMood: "${mood || 'unknown'}"\nIntensity: ${level}\n\n${flavor}`;
 
-    // 🔥 Make request to OpenRouter
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
+    // 🌐 Call OpenRouter
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
       headers: {
         'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://liftorzing.com',
-        'X-Title': 'LiftorZing'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: selectedModel,
         messages: [
-          {
-            role: 'system',
-            content: 'You are a creative, funny, supportive assistant generating personalized roast or uplifting messages for users.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
+          { role: "system", content: "You are a playful, thoughtful assistant that creates brief but expressive messages based on mood input. Keep it under 3 sentences." },
+          { role: "user", content: prompt }
         ],
-        temperature: 0.9,
-        max_tokens: 100
+        temperature: 0.95,
+        max_tokens: 160
       })
     });
 
@@ -100,9 +94,7 @@ exports.handler = async function(event, context) {
     }
 
     const result = await response.json();
-    const message =
-      result?.choices?.[0]?.message?.content?.trim() ||
-      'Oops, nothing came through.';
+    const message = result?.choices?.[0]?.message?.content?.trim() || "Oops, nothing came through.";
 
     return {
       statusCode: 200,
@@ -110,11 +102,11 @@ exports.handler = async function(event, context) {
       body: JSON.stringify({
         message,
         title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
-        source: selectedModel
+        source: 'openrouter'
       })
     };
   } catch (err) {
-    console.error('General error:', err.message);
+    console.error("Unhandled error:", err);
     return {
       statusCode: 500,
       headers: {
@@ -126,7 +118,7 @@ exports.handler = async function(event, context) {
   }
 };
 
-// 🛟 Fallback response
+// 💥 Basic fallback in case OpenRouter fails
 function generateFallbackResponse(data, headers) {
   const fallbackMessage = `Hey ${data.name || 'there'}, even when things glitch, you're still amazing. Try again in a moment.`;
   return {
