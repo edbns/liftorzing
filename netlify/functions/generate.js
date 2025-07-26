@@ -27,49 +27,56 @@ function generateLocalResponse(data) {
 }
 
 // Fallback responses with more engaging content
-function generateFallbackResponse(data, headers, errorType = 'fallback') {
-  const tone = data.type === 'positive' || data.type === 'lift' ? 'Uplift' : 'Roast';
-  const title = tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED';
-  const displayName = data.name || 'Someone';
-  const userMood = data.mood?.toLowerCase() || 'feeling something';
+        function generateFallbackResponse(data, headers, errorType = 'fallback') {
+          const tone = data.type === 'positive' || data.type === 'lift' ? 'Uplift' : 'Roast';
+          const title = tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED';
+          const displayName = data.name || 'Someone';
+          const userMood = data.mood?.toLowerCase() || 'feeling something';
 
-  // Generate contextual fallback messages based on tone and mood
-  const fallbackMessages = {
-    rate_limit: tone === 'Uplift' 
-      ? `🔥 ${displayName}, the AI servers are taking a coffee break, but your energy is unstoppable! Even when tech glitches, you're still absolutely crushing it. Try again in a moment - you've got this! 💪`
-      : `😅 ${displayName}, the AI is having a moment (probably because it's intimidated by your greatness). Even when the servers are being dramatic, you're still the main character. Try again shortly! 🎭`,
-    
-    timeout: tone === 'Uplift'
-      ? `⚡ ${displayName}, the connection is taking its sweet time, but your vibe is timeless! The servers are busy processing how awesome you are. Try again in a moment - you're worth the wait! ✨`
-      : `⏰ ${displayName}, the AI is taking longer than expected (probably overthinking how to handle your legendary status). Even when tech is slow, you're still fast-tracked to greatness! Try again shortly! 🚀`,
-    
-    api_error: tone === 'Uplift'
-      ? `🌟 ${displayName}, the AI service is having a moment, but you're having a movement! Even when things glitch, you're still the upgrade. Try again shortly - you're too powerful to be stopped! 💫`
-      : `🎪 ${displayName}, the AI is having a technical difficulty (probably because it can't handle your level of excellence). Even when services are down, you're still up! Try again shortly! 🎯`,
-    
-    parse_error: tone === 'Uplift'
-      ? `💎 ${displayName}, something went wrong with the response, but nothing went wrong with your vibe! Even when tech fails, you succeed. Give it another shot - you're bulletproof! 🛡️`
-      : `🎭 ${displayName}, the response got confused (probably because it's trying to process your legendary energy). Even when parsing fails, you're still the main plot! Try again! 📖`,
-    
-    empty_response: tone === 'Uplift'
-      ? `✨ ${displayName}, nothing came through from the AI, but everything amazing is coming through from you! Even when responses are empty, you're full of greatness. Try again - you're the content! 🌟`
-      : `🎪 ${displayName}, the AI returned empty (probably because it's speechless at your excellence). Even when responses are void, you're the void-filler! Try again! 🎭`,
-    
-    fallback: tone === 'Uplift'
-      ? `🚀 ${displayName}, even when things glitch, you're still the upgrade! The AI might be having a moment, but you're having a movement. Try again shortly - you're too legendary to be stopped! 💪`
-      : `🎯 ${displayName}, the AI is being dramatic (probably because it can't handle your level of excellence). Even when services are down, you're still the main event! Try again shortly! 🎪`
-  };
+          // Generate contextual fallback messages based on tone and mood
+          const fallbackMessages = {
+            rate_limit: tone === 'Uplift' 
+              ? `🔥 ${displayName}, the AI servers are taking a coffee break, but your energy is unstoppable! Even when tech glitches, you're still absolutely crushing it. Try again in a moment - you've got this! 💪`
+              : `😅 ${displayName}, the AI is having a moment (probably because it's intimidated by your greatness). Even when the servers are being dramatic, you're still the main character. Try again shortly! 🎭`,
+            
+            timeout: tone === 'Uplift'
+              ? `⚡ ${displayName}, the connection is taking its sweet time, but your vibe is timeless! The servers are busy processing how awesome you are. Try again in a moment - you're worth the wait! ✨`
+              : `⏰ ${displayName}, the AI is taking longer than expected (probably overthinking how to handle your legendary status). Even when tech is slow, you're still fast-tracked to greatness! Try again shortly! 🚀`,
+            
+            api_error: tone === 'Uplift'
+              ? `🌟 ${displayName}, the AI service is having a moment, but you're having a movement! Even when things glitch, you're still the upgrade. Try again shortly - you're too powerful to be stopped! 💫`
+              : `🎪 ${displayName}, the AI is having a technical difficulty (probably because it can't handle your level of excellence). Even when services are down, you're still up! Try again shortly! 🎯`,
+            
+            parse_error: tone === 'Uplift'
+              ? `💎 ${displayName}, something went wrong with the response, but nothing went wrong with your vibe! Even when tech fails, you succeed. Give it another shot - you're bulletproof! 🛡️`
+              : `🎭 ${displayName}, the response got confused (probably because it's trying to process your legendary energy). Even when parsing fails, you're still the main plot! Try again! 📖`,
+            
+            empty_response: tone === 'Uplift'
+              ? `✨ ${displayName}, nothing came through from the AI, but everything amazing is coming through from you! Even when responses are empty, you're full of greatness. Try again - you're the content! 🌟`
+              : `🎪 ${displayName}, the AI returned empty (probably because it's speechless at your excellence). Even when responses are void, you're the void-filler! Try again! 🎭`,
+            
+            fallback: tone === 'Uplift'
+              ? `🚀 ${displayName}, even when things glitch, you're still the upgrade! The AI might be having a moment, but you're having a movement. Try again shortly - you're too legendary to be stopped! 💪`
+              : `🎯 ${displayName}, the AI is being dramatic (probably because it can't handle your level of excellence). Even when services are down, you're still the main event! Try again shortly! 🎪`
+          };
 
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({
-      message: fallbackMessages[errorType] || fallbackMessages.fallback,
-      title,
-      source: errorType
-    })
-  };
-}
+          // Add marketing hashtags to fallback messages
+          const hashtags = tone === 'Uplift' 
+            ? '\n\n💫 Generated by Lift or Zing™\n#LiftOrZing #PositiveVibes #Motivation #GoodVibes #LiftUp #SpreadJoy'
+            : '\n\n🔥 Generated by Lift or Zing™\n#LiftOrZing #RoastMode #Funny #Viral #Trending #ZingLife';
+          
+          const enhancedMessage = fallbackMessages[errorType] || fallbackMessages.fallback + hashtags;
+
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+              message: enhancedMessage,
+              title,
+              source: errorType
+            })
+          };
+        }
 
 exports.handler = async function (event, context) {
   const headers = {
@@ -110,41 +117,31 @@ exports.handler = async function (event, context) {
   }
 
   const prompt = `
-Respond in under 4 lines for social sharing.
+Create an engaging, multi-line message (6-8 lines) for social sharing.
 Tone: ${tone}
 Name: ${displayName}${gender ? ` (${gender})` : ''}
 Mood: "${mood || 'unknown'}"
 Intensity: ${level}
 
-Write a creative, short, emotionally expressive message.
-If Roast: be playful, clever, but not mean.
-If Uplift: be powerful, vivid, encouraging.
-Keep it concise and quotable.
+Write a creative, emotionally expressive message that feels personal and impactful.
+If Roast: be playful, clever, witty, and entertaining - but never mean or hurtful.
+If Uplift: be powerful, vivid, encouraging, and genuinely motivating.
+
+Make it engaging enough that people want to share it.
+Include emojis and creative formatting to make it visually appealing.
+The message should feel like it was written specifically for this person.
 `;
 
   const MODEL_POOL = [
-    // Free tier models (may be rate limited)
-    { model: 'mistralai/mistral-7b-instruct:free', key: process.env.OPENROUTER_KEY_MISTRAL, tier: 'free' },
-    { model: 'sarvamai/sarvam-m:free', key: process.env.OPENROUTER_KEY_SARVAM, tier: 'free' },
-    { model: 'shisa-ai/shisa-v2-llama3.3-70b:free', key: process.env.OPENROUTER_KEY_SHISA, tier: 'free' },
-    { model: 'moonshotai/kimi-vl-a3b-thinking:free', key: process.env.OPENROUTER_KEY_KIMI, tier: 'free' },
-    { model: 'nvidia/llama-3.1-nemotron-ultra-253b-v1:free', key: process.env.OPENROUTER_KEY_NEMO, tier: 'free' },
-    
-    // Paid tier models (more reliable, fallback options)
-    { model: 'openai/gpt-3.5-turbo', key: process.env.OPENROUTER_KEY_PAID, tier: 'paid' },
-    { model: 'anthropic/claude-3-haiku', key: process.env.OPENROUTER_KEY_PAID, tier: 'paid' },
-    { model: 'google/gemini-flash-1.5', key: process.env.OPENROUTER_KEY_PAID, tier: 'paid' }
+    { model: 'mistralai/mistral-7b-instruct:free', key: process.env.OPENROUTER_KEY_MISTRAL },
+    { model: 'sarvamai/sarvam-m:free', key: process.env.OPENROUTER_KEY_SARVAM },
+    { model: 'shisa-ai/shisa-v2-llama3.3-70b:free', key: process.env.OPENROUTER_KEY_SHISA },
+    { model: 'moonshotai/kimi-vl-a3b-thinking:free', key: process.env.OPENROUTER_KEY_KIMI },
+    { model: 'nvidia/llama-3.1-nemotron-ultra-253b-v1:free', key: process.env.OPENROUTER_KEY_NEMO }
   ];
 
-  // Try free models first, then paid models as fallback
-  const freeModels = MODEL_POOL.filter(m => m.tier === 'free' && m.key);
-  const paidModels = MODEL_POOL.filter(m => m.tier === 'paid' && m.key);
-  
-  // Track rate limited models to avoid immediate retries
-  const rateLimitedModels = new Set();
-  
-  // Try free models first
-  for (const { model, key } of freeModels) {
+  for (const { model, key } of MODEL_POOL) {
+    if (!key) continue;
 
     try {
       const controller = new AbortController();
@@ -161,7 +158,7 @@ Keep it concise and quotable.
         body: JSON.stringify({
           model,
           messages: [{ role: 'user', content: prompt.trim() }],
-          max_tokens: 80,
+          max_tokens: 200,
           temperature: 0.9,
           top_p: 0.9,
           stream: false
@@ -175,7 +172,6 @@ Keep it concise and quotable.
         console.warn(`Model ${model} responded with status ${response.status}`);
         if (response.status === 429) {
           console.warn(`Rate limit hit for model ${model}`);
-          rateLimitedModels.add(model);
         }
         continue;
       }
@@ -184,11 +180,18 @@ Keep it concise and quotable.
       const message = result?.choices?.[0]?.message?.content?.trim();
 
       if (message && message.length > 10) {
+        // Add marketing hashtags and branding
+        const hashtags = tone === 'Uplift' 
+          ? '\n\n💫 Generated by Lift or Zing™\n#LiftOrZing #PositiveVibes #Motivation #GoodVibes #LiftUp #SpreadJoy'
+          : '\n\n🔥 Generated by Lift or Zing™\n#LiftOrZing #RoastMode #Funny #Viral #Trending #ZingLife';
+        
+        const enhancedMessage = message + hashtags;
+        
         return {
           statusCode: 200,
           headers,
           body: JSON.stringify({
-            message,
+            message: enhancedMessage,
             title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
             source: model
           })
@@ -201,73 +204,24 @@ Keep it concise and quotable.
       console.warn(`Model ${model} failed:`, err.name === 'AbortError' ? 'Timeout' : err.message);
     }
   }
-  
-  // If all free models failed, try paid models
-  console.log('All free models failed, trying paid models...');
-  for (const { model, key } of paidModels) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 sec
 
-      const response = await fetch(`https://openrouter.ai/api/v1/chat/completions`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${key}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://liftorzing.com',
-          'X-Title': 'LiftorZing'
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'user', content: prompt.trim() }],
-          max_tokens: 80,
-          temperature: 0.9,
-          top_p: 0.9,
-          stream: false
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        console.warn(`Paid model ${model} responded with status ${response.status}`);
-        continue;
-      }
-
-      const result = await response.json();
-      const message = result?.choices?.[0]?.message?.content?.trim();
-
-      if (message && message.length > 10) {
-        console.log(`Paid model ${model} succeeded`);
+  // If all models failed, generate a local response instead of a generic fallback
+          const localMessage = generateLocalResponse(data);
+        
+        // Add marketing hashtags to local fallback messages too
+        const hashtags = tone === 'Uplift' 
+          ? '\n\n💫 Generated by Lift or Zing™\n#LiftOrZing #PositiveVibes #Motivation #GoodVibes #LiftUp #SpreadJoy'
+          : '\n\n🔥 Generated by Lift or Zing™\n#LiftOrZing #RoastMode #Funny #Viral #Trending #ZingLife';
+        
+        const enhancedLocalMessage = localMessage + hashtags;
+        
         return {
           statusCode: 200,
           headers,
           body: JSON.stringify({
-            message,
+            message: enhancedLocalMessage,
             title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
-            source: model
+            source: 'local-fallback'
           })
         };
-      } else {
-        console.warn(`Paid model ${model} returned empty message.`);
-      }
-
-    } catch (err) {
-      console.warn(`Paid model ${model} failed:`, err.name === 'AbortError' ? 'Timeout' : err.message);
-    }
-  }
-
-  // If all models failed, generate a local response instead of a generic fallback
-  const localMessage = generateLocalResponse(data);
-  
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({
-      message: localMessage,
-      title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
-      source: 'local-fallback'
-    })
-  };
 };
