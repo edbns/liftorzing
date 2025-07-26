@@ -1,0 +1,1 @@
+[{"id":"ANIMATION-FIX","content":"Fix door appearing briefly during transition animation","status":"completed","priority":"high"},{"id":"BACKEND-CHECK","content":"Check backend API response time and setup","status":"completed","priority":"high"},{"id":"SCREENSHOT-ANALYZE","content":"Analyze uploaded screenshot for debugging context","status":"completed","priority":"medium"}]
