@@ -1,16 +1,63 @@
 const fetch = require('node-fetch');
 
-// Fallback responses
+// Simple local response generator for when AI models are unavailable
+function generateLocalResponse(data) {
+  const tone = data.type === 'positive' || data.type === 'lift' ? 'Uplift' : 'Roast';
+  const displayName = data.name || 'Someone';
+  const userMood = data.mood?.toLowerCase() || 'feeling something';
+  
+  const upliftResponses = [
+    `🔥 ${displayName}, you're absolutely crushing it! Your energy is unstoppable and your vibe is immaculate. Keep shining bright! ✨`,
+    `🚀 ${displayName}, you're not just living your best life - you're creating it! Every step you take is legendary. Keep going! 💪`,
+    `🌟 ${displayName}, you're the upgrade everyone needs! Your greatness is undeniable and your potential is limitless. You've got this! 💫`,
+    `⚡ ${displayName}, you're electric! Your energy is contagious and your spirit is unbreakable. You're absolutely killing it! 🔥`,
+    `💎 ${displayName}, you're a diamond in a world of cubic zirconia! Your shine is authentic and your worth is priceless. Keep being you! ✨`
+  ];
+  
+  const roastResponses = [
+    `😅 ${displayName}, the AI is having a moment (probably intimidated by your excellence). Even when tech fails, you're still the main character! 🎭`,
+    `🎪 ${displayName}, the servers are being dramatic (can't handle your level of greatness). You're still the show everyone's watching! 🎯`,
+    `⏰ ${displayName}, the AI is taking its sweet time (overthinking how to process your legendary status). You're still fast-tracked to success! 🚀`,
+    `🎭 ${displayName}, the AI is speechless (probably because you're too amazing for words). Even when responses fail, you're still the plot! 📖`,
+    `🎪 ${displayName}, the AI is having technical difficulties (can't compute your level of excellence). You're still the main event! 🎯`
+  ];
+  
+  const responses = tone === 'Uplift' ? upliftResponses : roastResponses;
+  return responses[Math.floor(Math.random() * responses.length)];
+}
+
+// Fallback responses with more engaging content
 function generateFallbackResponse(data, headers, errorType = 'fallback') {
   const tone = data.type === 'positive' || data.type === 'lift' ? 'Uplift' : 'Roast';
   const title = tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED';
+  const displayName = data.name || 'Someone';
+  const userMood = data.mood?.toLowerCase() || 'feeling something';
 
+  // Generate contextual fallback messages based on tone and mood
   const fallbackMessages = {
-    timeout: "Connection taking longer than expected. The servers are busy, but you're still amazing. Try again in a moment.",
-    api_error: "The AI service is having a moment, but you're still legendary. Try again shortly.",
-    parse_error: "Something went wrong with the response, but you're still awesome. Give it another shot.",
-    fallback: "Hey there, even when things glitch, you're still legendary. Try again shortly.",
-    empty_response: "Oops, nothing came through. But you're still amazing!"
+    rate_limit: tone === 'Uplift' 
+      ? `🔥 ${displayName}, the AI servers are taking a coffee break, but your energy is unstoppable! Even when tech glitches, you're still absolutely crushing it. Try again in a moment - you've got this! 💪`
+      : `😅 ${displayName}, the AI is having a moment (probably because it's intimidated by your greatness). Even when the servers are being dramatic, you're still the main character. Try again shortly! 🎭`,
+    
+    timeout: tone === 'Uplift'
+      ? `⚡ ${displayName}, the connection is taking its sweet time, but your vibe is timeless! The servers are busy processing how awesome you are. Try again in a moment - you're worth the wait! ✨`
+      : `⏰ ${displayName}, the AI is taking longer than expected (probably overthinking how to handle your legendary status). Even when tech is slow, you're still fast-tracked to greatness! Try again shortly! 🚀`,
+    
+    api_error: tone === 'Uplift'
+      ? `🌟 ${displayName}, the AI service is having a moment, but you're having a movement! Even when things glitch, you're still the upgrade. Try again shortly - you're too powerful to be stopped! 💫`
+      : `🎪 ${displayName}, the AI is having a technical difficulty (probably because it can't handle your level of excellence). Even when services are down, you're still up! Try again shortly! 🎯`,
+    
+    parse_error: tone === 'Uplift'
+      ? `💎 ${displayName}, something went wrong with the response, but nothing went wrong with your vibe! Even when tech fails, you succeed. Give it another shot - you're bulletproof! 🛡️`
+      : `🎭 ${displayName}, the response got confused (probably because it's trying to process your legendary energy). Even when parsing fails, you're still the main plot! Try again! 📖`,
+    
+    empty_response: tone === 'Uplift'
+      ? `✨ ${displayName}, nothing came through from the AI, but everything amazing is coming through from you! Even when responses are empty, you're full of greatness. Try again - you're the content! 🌟`
+      : `🎪 ${displayName}, the AI returned empty (probably because it's speechless at your excellence). Even when responses are void, you're the void-filler! Try again! 🎭`,
+    
+    fallback: tone === 'Uplift'
+      ? `🚀 ${displayName}, even when things glitch, you're still the upgrade! The AI might be having a moment, but you're having a movement. Try again shortly - you're too legendary to be stopped! 💪`
+      : `🎯 ${displayName}, the AI is being dramatic (probably because it can't handle your level of excellence). Even when services are down, you're still the main event! Try again shortly! 🎪`
   };
 
   return {
@@ -113,6 +160,9 @@ Keep it concise and quotable.
 
       if (!response.ok) {
         console.warn(`Model ${model} responded with status ${response.status}`);
+        if (response.status === 429) {
+          console.warn(`Rate limit hit for model ${model}`);
+        }
         continue;
       }
 
@@ -138,5 +188,16 @@ Keep it concise and quotable.
     }
   }
 
-  return generateFallbackResponse(data, headers, 'fallback');
+  // If all models failed, generate a local response instead of a generic fallback
+  const localMessage = generateLocalResponse(data);
+  
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      message: localMessage,
+      title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
+      source: 'local-fallback'
+    })
+  };
 };
