@@ -3255,7 +3255,6 @@
       submitBtn.disabled = false;
       submitBtn.style.opacity = "1";
     }
-    
     function generateMessage(event) {
       event.preventDefault();
       
@@ -3299,16 +3298,16 @@
         // Show loading state
         showLoadingState();
         
-              // Save form data for retry functionality
-      lastFormData = {
-        name: name,
-        gender: gender,
-        mood: moodText || keywords,
-        intensity: selectedIntensity,
-        type: currentType === 'positive' ? 'positive' : 'funny',
-        inputMethod: currentInputMethod,
-        photoFile: photoFile
-      };
+        // Save form data for retry functionality
+        lastFormData = {
+          name: name,
+          gender: gender,
+          mood: moodText || keywords,
+          intensity: selectedIntensity,
+          type: currentType === 'positive' ? 'positive' : 'funny',
+          inputMethod: currentInputMethod,
+          photoFile: photoFile
+        };
         
         // Prepare data for API call
         const requestData = {
@@ -3372,7 +3371,7 @@
           displayGeneratedMessage('ZING MODE ENGAGED', 'Oops, nothing came through.');
         });
       } catch (error) {
-        console.error('Error:', error);
+                console.error('Error:', error);
         hideLoadingAndEnableButton();
       }
     }
