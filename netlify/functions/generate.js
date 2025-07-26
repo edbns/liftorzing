@@ -6,21 +6,21 @@ function generateLocalResponse(data) {
   const displayName = data.name || 'Someone';
   const userMood = data.mood?.toLowerCase() || 'feeling something';
   
-  const upliftResponses = [
-    `🔥 ${displayName}, you're absolutely crushing it! Your energy is unstoppable and your vibe is immaculate. Keep shining bright! ✨`,
-    `🚀 ${displayName}, you're not just living your best life - you're creating it! Every step you take is legendary. Keep going! 💪`,
-    `🌟 ${displayName}, you're the upgrade everyone needs! Your greatness is undeniable and your potential is limitless. You've got this! 💫`,
-    `⚡ ${displayName}, you're electric! Your energy is contagious and your spirit is unbreakable. You're absolutely killing it! 🔥`,
-    `💎 ${displayName}, you're a diamond in a world of cubic zirconia! Your shine is authentic and your worth is priceless. Keep being you! ✨`
-  ];
+          const upliftResponses = [
+          `🔥 ${displayName}, you're absolutely crushing it! Your energy is unstoppable and your vibe is immaculate. Every step you take is legendary and your greatness is undeniable. You're not just living your best life - you're creating it! Keep shining bright and remember: you're the upgrade everyone needs! ✨`,
+          `🚀 ${displayName}, you're a force of nature! Your potential is limitless and your spirit is unbreakable. Every challenge you face makes you stronger, every obstacle you overcome makes you wiser. You're not just surviving - you're thriving! Keep going because the world needs your light! 💪`,
+          `🌟 ${displayName}, you're absolutely electric! Your energy is contagious and your presence is magnetic. You have this incredible ability to turn ordinary moments into extraordinary memories. Your authenticity is your superpower and your kindness is your legacy. Keep being the amazing person you are! 💫`,
+          `⚡ ${displayName}, you're a diamond in a world of cubic zirconia! Your shine is authentic, your worth is priceless, and your impact is immeasurable. You have this rare gift of making everyone around you feel seen and valued. Your journey is inspiring and your future is limitless! 🔥`,
+          `💎 ${displayName}, you're the main character in your own epic story! Your resilience is legendary, your courage is inspiring, and your heart is pure gold. Every setback is just a setup for your comeback. You're not just making waves - you're creating tsunamis of positive change! ✨`
+        ];
   
-  const roastResponses = [
-    `😅 ${displayName}, the AI is having a moment (probably intimidated by your excellence). Even when tech fails, you're still the main character! 🎭`,
-    `🎪 ${displayName}, the servers are being dramatic (can't handle your level of greatness). You're still the show everyone's watching! 🎯`,
-    `⏰ ${displayName}, the AI is taking its sweet time (overthinking how to process your legendary status). You're still fast-tracked to success! 🚀`,
-    `🎭 ${displayName}, the AI is speechless (probably because you're too amazing for words). Even when responses fail, you're still the plot! 📖`,
-    `🎪 ${displayName}, the AI is having technical difficulties (can't compute your level of excellence). You're still the main event! 🎯`
-  ];
+          const roastResponses = [
+          `😅 ${displayName}, the AI is having a moment (probably intimidated by your excellence). Even when tech fails, you're still the main character! The servers are being dramatic because they can't handle your level of greatness. You're not just the plot - you're the entire series! 🎭`,
+          `🎪 ${displayName}, the servers are being extra dramatic today (can't compute your legendary status). The AI is probably overthinking how to process someone as amazing as you. Even when technology has a meltdown, you're still the show everyone's watching! 🎯`,
+          `⏰ ${displayName}, the AI is taking its sweet time (probably because it's trying to figure out how to handle your level of excellence). The servers are having a moment, but you're still fast-tracked to success! Even when tech is slow, you're still the main event! 🚀`,
+          `🎭 ${displayName}, the AI is completely speechless (probably because you're too amazing for words). The servers are having technical difficulties trying to process your legendary energy. Even when responses fail, you're still the entire plot! 📖`,
+          `🎪 ${displayName}, the AI is having a full-on existential crisis (can't handle your level of excellence). The servers are being dramatic because they're intimidated by your greatness. Even when technology breaks down, you're still the main event and the show must go on! 🎯`
+        ];
   
   const responses = tone === 'Uplift' ? upliftResponses : roastResponses;
   return responses[Math.floor(Math.random() * responses.length)];
@@ -137,11 +137,24 @@ The message should feel like it was written specifically for this person.
     { model: 'sarvamai/sarvam-m:free', key: process.env.OPENROUTER_KEY_SARVAM },
     { model: 'shisa-ai/shisa-v2-llama3.3-70b:free', key: process.env.OPENROUTER_KEY_SHISA },
     { model: 'moonshotai/kimi-vl-a3b-thinking:free', key: process.env.OPENROUTER_KEY_KIMI },
-    { model: 'nvidia/llama-3.1-nemotron-ultra-253b-v1:free', key: process.env.OPENROUTER_KEY_NEMO }
+    { model: 'nvidia/llama-3.1-nemotron-ultra-253b-v1:free', key: process.env.OPENROUTER_KEY_NEMO },
+    { model: 'meta-llama/llama-3.1-8b-instruct:free', key: process.env.OPENROUTER_KEY_META },
+    { model: 'google/gemini-flash-1.5:free', key: process.env.OPENROUTER_KEY_GEMINI },
+    { model: 'anthropic/claude-3-haiku:free', key: process.env.OPENROUTER_KEY_ANTHROPIC },
+    { model: 'openai/gpt-3.5-turbo:free', key: process.env.OPENROUTER_KEY_OPENAI }
   ];
 
+  // Track rate limited models to avoid immediate retries
+  const rateLimitedModels = new Set();
+  
   for (const { model, key } of MODEL_POOL) {
     if (!key) continue;
+    
+    // Skip models that were recently rate limited
+    if (rateLimitedModels.has(model)) {
+      console.log(`Skipping recently rate limited model: ${model}`);
+      continue;
+    }
 
     try {
       const controller = new AbortController();
@@ -172,6 +185,7 @@ The message should feel like it was written specifically for this person.
         console.warn(`Model ${model} responded with status ${response.status}`);
         if (response.status === 429) {
           console.warn(`Rate limit hit for model ${model}`);
+          rateLimitedModels.add(model);
         }
         continue;
       }
