@@ -123,15 +123,28 @@ Keep it concise and quotable.
 `;
 
   const MODEL_POOL = [
-    { model: 'mistralai/mistral-7b-instruct:free', key: process.env.OPENROUTER_KEY_MISTRAL },
-    { model: 'sarvamai/sarvam-m:free', key: process.env.OPENROUTER_KEY_SARVAM },
-    { model: 'shisa-ai/shisa-v2-llama3.3-70b:free', key: process.env.OPENROUTER_KEY_SHISA },
-    { model: 'moonshotai/kimi-vl-a3b-thinking:free', key: process.env.OPENROUTER_KEY_KIMI },
-    { model: 'nvidia/llama-3.1-nemotron-ultra-253b-v1:free', key: process.env.OPENROUTER_KEY_NEMO }
+    // Free tier models (may be rate limited)
+    { model: 'mistralai/mistral-7b-instruct:free', key: process.env.OPENROUTER_KEY_MISTRAL, tier: 'free' },
+    { model: 'sarvamai/sarvam-m:free', key: process.env.OPENROUTER_KEY_SARVAM, tier: 'free' },
+    { model: 'shisa-ai/shisa-v2-llama3.3-70b:free', key: process.env.OPENROUTER_KEY_SHISA, tier: 'free' },
+    { model: 'moonshotai/kimi-vl-a3b-thinking:free', key: process.env.OPENROUTER_KEY_KIMI, tier: 'free' },
+    { model: 'nvidia/llama-3.1-nemotron-ultra-253b-v1:free', key: process.env.OPENROUTER_KEY_NEMO, tier: 'free' },
+    
+    // Paid tier models (more reliable, fallback options)
+    { model: 'openai/gpt-3.5-turbo', key: process.env.OPENROUTER_KEY_PAID, tier: 'paid' },
+    { model: 'anthropic/claude-3-haiku', key: process.env.OPENROUTER_KEY_PAID, tier: 'paid' },
+    { model: 'google/gemini-flash-1.5', key: process.env.OPENROUTER_KEY_PAID, tier: 'paid' }
   ];
 
-  for (const { model, key } of MODEL_POOL) {
-    if (!key) continue;
+  // Try free models first, then paid models as fallback
+  const freeModels = MODEL_POOL.filter(m => m.tier === 'free' && m.key);
+  const paidModels = MODEL_POOL.filter(m => m.tier === 'paid' && m.key);
+  
+  // Track rate limited models to avoid immediate retries
+  const rateLimitedModels = new Set();
+  
+  // Try free models first
+  for (const { model, key } of freeModels) {
 
     try {
       const controller = new AbortController();
@@ -162,6 +175,7 @@ Keep it concise and quotable.
         console.warn(`Model ${model} responded with status ${response.status}`);
         if (response.status === 429) {
           console.warn(`Rate limit hit for model ${model}`);
+          rateLimitedModels.add(model);
         }
         continue;
       }
@@ -185,6 +199,62 @@ Keep it concise and quotable.
 
     } catch (err) {
       console.warn(`Model ${model} failed:`, err.name === 'AbortError' ? 'Timeout' : err.message);
+    }
+  }
+  
+  // If all free models failed, try paid models
+  console.log('All free models failed, trying paid models...');
+  for (const { model, key } of paidModels) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 sec
+
+      const response = await fetch(`https://openrouter.ai/api/v1/chat/completions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${key}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://liftorzing.com',
+          'X-Title': 'LiftorZing'
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: prompt.trim() }],
+          max_tokens: 80,
+          temperature: 0.9,
+          top_p: 0.9,
+          stream: false
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.warn(`Paid model ${model} responded with status ${response.status}`);
+        continue;
+      }
+
+      const result = await response.json();
+      const message = result?.choices?.[0]?.message?.content?.trim();
+
+      if (message && message.length > 10) {
+        console.log(`Paid model ${model} succeeded`);
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            message,
+            title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
+            source: model
+          })
+        };
+      } else {
+        console.warn(`Paid model ${model} returned empty message.`);
+      }
+
+    } catch (err) {
+      console.warn(`Paid model ${model} failed:`, err.name === 'AbortError' ? 'Timeout' : err.message);
     }
   }
 
