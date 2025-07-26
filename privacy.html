@@ -22,59 +22,125 @@
   <meta name="twitter:description" content="One click. One fate. Get roasted 💀 or uplifted 💫 at liftorzing.com" />
   <meta name="twitter:image" content="https://liftorzing.com/social-preview.jpg" />
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
       font-family: 'JetBrains Mono', monospace;
+      background-color: #000000;
+      color: #ffffff;
       line-height: 1.6;
-      margin: 2rem;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
       max-width: 800px;
+      margin: 0 auto;
     }
-    h1, h2 {
-      color: #000000;
+    
+    h1 {
       font-family: 'Orbitron', monospace;
+      color: #ffffff;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
+    
+    h2 {
+      font-family: 'Orbitron', monospace;
+      color: #ffffff;
+      font-size: 1.4em;
+      margin: 30px 0 15px 0;
+      border-left: 4px solid #ffffff;
+      padding-left: 15px;
+    }
+    
+    p {
+      margin-bottom: 15px;
+      color: #e0e0e0;
+    }
+    
+    ul {
+      margin: 15px 0 15px 30px;
+    }
+    
+    li {
+      margin-bottom: 8px;
+      color: #e0e0e0;
+    }
+    
     a {
-      color: #000000;
+      color: #ffffff;
       text-decoration: none;
-      border-bottom: 1px solid #000000;
+      border-bottom: 1px solid #ffffff;
       transition: opacity 0.3s ease;
     }
+    
     a:hover {
       opacity: 0.7;
     }
-    ul {
-      padding-left: 20px;
+    
+    strong {
+      color: #ffffff;
     }
-    li {
-      margin-bottom: 8px;
-    }
+    
     .back-link {
-      position: absolute;
+      position: fixed;
       top: 20px;
       left: 20px;
-      background: #000000;
-      color: #ffffff;
+      background: #ffffff;
+      color: #000000;
       padding: 10px 20px;
       border: none;
       cursor: pointer;
       font-family: 'JetBrains Mono', monospace;
       font-weight: bold;
       transition: opacity 0.3s ease;
-      text-decoration: none;
-      border-bottom: none;
     }
+    
     .back-link:hover {
       opacity: 0.8;
-      border-bottom: none;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 15px;
+      }
+      
+      h1 {
+        font-size: 2em;
+      }
+      
+      h2 {
+        font-size: 1.2em;
+      }
+      
+      .back-link {
+        position: relative;
+        top: 0;
+        left: 0;
+        margin-bottom: 20px;
+        display: block;
+        width: fit-content;
+      }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
-  <a href="index.html" class="back-link">← BACK TO DOORS</a>
-  <h1>Privacy Policy</h1>
-  <p><strong>Effective Date:</strong> July 27, 2024</p>
+  <button class="back-link" onclick="window.location.href='index.html'">← BACK TO DOORS</button>
+  
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <p><strong>Effective Date:</strong> July 27, 2025</p>
 
-  <p>At <strong>Lift or Zing™</strong>, your privacy is important to us. This policy outlines how we handle your data.</p>
+    <p>At <strong>Lift or Zing™</strong>, your privacy is important to us. This policy outlines how we handle your data.</p>
 
   <h2>1. No Personal Data Collected</h2>
   <p>You can use Lift or Zing™ without registering, logging in, or providing any contact details. We do not collect any personal information directly.</p>
@@ -108,7 +174,8 @@
   <h2>8. Changes to this Policy</h2>
   <p>We may update this policy occasionally. Any major changes will be noted on this page.</p>
 
-  <h2>9. Contact</h2>
-  <p>If you have questions about this privacy policy, please contact us at <a href="mailto:pickaside@liftorzing.com">pickaside@liftorzing.com</a></p>
+    <h2>9. Contact</h2>
+    <p>If you have questions about this privacy policy, please contact us at <a href="mailto:pickaside@liftorzing.com">pickaside@liftorzing.com</a></p>
+  </div>
 </body>
 </html>
