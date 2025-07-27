@@ -138,10 +138,7 @@ Write only the message, no instructions or labels.
     { model: 'shisa-ai/shisa-v2-llama3.3-70b:free', key: process.env.OPENROUTER_KEY_SHISA },
     { model: 'moonshotai/kimi-vl-a3b-thinking:free', key: process.env.OPENROUTER_KEY_KIMI },
     { model: 'nvidia/llama-3.1-nemotron-ultra-253b-v1:free', key: process.env.OPENROUTER_KEY_NEMO },
-    { model: 'meta-llama/llama-3.1-8b-instruct:free', key: process.env.OPENROUTER_KEY_META },
-    { model: 'google/gemini-flash-1.5:free', key: process.env.OPENROUTER_KEY_GEMINI },
-    { model: 'anthropic/claude-3-haiku:free', key: process.env.OPENROUTER_KEY_ANTHROPIC },
-    { model: 'openai/gpt-3.5-turbo:free', key: process.env.OPENROUTER_KEY_OPENAI }
+  
   ];
 
   // Track rate limited models to avoid immediate retries
