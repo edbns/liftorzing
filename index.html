@@ -756,6 +756,48 @@
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+      
+      /* Force each input on its own line for mobile */
+      #form-container form > div:first-child {
+        display: block !important;
+        gap: 0 !important;
+        margin-bottom: 0 !important;
+      }
+      
+      #form-container form > div:first-child > div {
+        flex: none !important;
+        width: 100% !important;
+        margin-bottom: 20px !important;
+      }
+      
+      /* Ensure proper centering and spacing */
+      #form-container h2,
+      #form-container p,
+      #form-container label,
+      #form-container input,
+      #form-container textarea,
+      #form-container .gender-select,
+      #form-container .input-method-section,
+      #form-container .input-section {
+        text-align: center;
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      /* Fix dropdown positioning on mobile */
+      .dropdown-options {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 1000;
       }
       
       .close-btn {
@@ -831,12 +873,45 @@
       label {
         font-size: 1.1rem;
         margin-top: 20px;
+        text-align: center;
+        display: block;
       }
       
       /* Ensure form fits well on mobile */
       .centered {
         padding: 15px;
         min-height: 100vh;
+      }
+      
+      /* Additional mobile form improvements */
+      #form-container form {
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      #form-container .input-method-toggle {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      #form-container .method-btn {
+        width: 100%;
+        margin: 0;
+      }
+      
+      /* Ensure proper spacing between form elements */
+      #form-container .input-section {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      
+      #form-container textarea {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
       }
     }
     
