@@ -39,7 +39,7 @@ function generateLocalResponse(data) {
 // Fallback responses if something fails
 function generateFallbackResponse(data, headers, errorType = 'fallback') {
   const tone = data.type === 'positive' || data.type === 'lift' ? 'Uplift' : 'Roast';
-  const title = tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED';
+  const title = tone === 'Uplift' ? 'LIFT MODE ENGAGED' : 'ZING MODE ENGAGED';
   const displayName = data.name || 'Someone';
 
   const fallbackMessages = {
@@ -162,7 +162,7 @@ Write only the message, no instructions. Keep it short and sweet.
           headers,
           body: JSON.stringify({
             message,
-            title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
+            title: tone === 'Uplift' ? 'LIFT MODE ENGAGED' : 'ZING MODE ENGAGED',
             source: model
           })
         };
@@ -206,7 +206,7 @@ Write only the message, no instructions. Keep it short and sweet.
             headers,
             body: JSON.stringify({
               message,
-              title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
+              title: tone === 'Uplift' ? 'LIFT MODE ENGAGED' : 'ZING MODE ENGAGED',
               source: `huggingface-${model}`
             })
           };
@@ -226,7 +226,7 @@ Write only the message, no instructions. Keep it short and sweet.
     headers,
     body: JSON.stringify({
       message: localMessage,
-      title: tone === 'Uplift' ? 'LIFT PROTOCOL ACTIVATED' : 'ZING MODE ENGAGED',
+      title: tone === 'Uplift' ? 'LIFT MODE ENGAGED' : 'ZING MODE ENGAGED',
       source: 'local-fallback'
     })
   };
