@@ -160,7 +160,7 @@ Write only the message, no instructions.
         body: JSON.stringify({
           model,
           messages: [{ role: 'user', content: prompt.trim() }],
-          max_tokens: 200,
+          max_tokens: 400,
           temperature: 0.9
         }),
         signal: controller.signal
@@ -209,7 +209,7 @@ Write only the message, no instructions.
             Authorization: `Bearer ${hfKey}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ inputs: prompt.trim(), parameters: { max_new_tokens: 150 } }),
+          body: JSON.stringify({ inputs: prompt.trim(), parameters: { max_new_tokens: 300 } }),
           signal: controller.signal
         });
 
