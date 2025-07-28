@@ -3551,6 +3551,10 @@
       // Store the randomly chosen mode in sessionStorage
       window.sessionStorage.setItem("doorMode", mode);
       
+      // Set the currentType based on the selected mode
+      currentType = mode === 'lift' ? 'positive' : 'funny';
+      console.log('Current type set to:', currentType); // Debug log
+      
       // Hide the main container
       document.getElementById('container').style.display = 'none';
       
