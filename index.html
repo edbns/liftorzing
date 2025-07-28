@@ -3546,6 +3546,7 @@
       // Randomly choose between lift and zing mode
       const modes = ["lift", "zing"];
       const mode = modes[Math.floor(Math.random() * modes.length)];
+      console.log('Selected mode:', mode); // Debug log
       
       // Store the randomly chosen mode in sessionStorage
       window.sessionStorage.setItem("doorMode", mode);
@@ -3686,9 +3687,12 @@
           if (retryContainer) retryContainer.style.display = 'none';
           
           // Ensure we always check for data.message and provide fallback
+          const storedMode = window.sessionStorage.getItem("doorMode");
+          console.log('Stored mode:', storedMode); // Debug log
+          const defaultTitle = storedMode === 'lift' ? 'LIFT MODE ENGAGED' : 'ZING MODE ENGAGED';
+          console.log('Default title:', defaultTitle); // Debug log
+          
           if (data?.message) {
-            const storedMode = window.sessionStorage.getItem("doorMode");
-            const defaultTitle = storedMode === 'lift' ? 'LIFT MODE ENGAGED' : 'ZING MODE ENGAGED';
             displayGeneratedMessage(data.title || defaultTitle, data.message);
           } else {
             displayGeneratedMessage(defaultTitle, 'Oops, nothing came through.');
@@ -3838,7 +3842,9 @@
         console.error('Network or Parsing Error:', error);
         hideLoadingState();
         // Always show a fallback message instead of trying local generation
-        displayGeneratedMessage('ZING MODE ENGAGED', 'Oops, nothing came through.');
+        const storedMode = window.sessionStorage.getItem("doorMode");
+        const defaultTitle = storedMode === 'lift' ? 'LIFT MODE ENGAGED' : 'ZING MODE ENGAGED';
+        displayGeneratedMessage(defaultTitle, 'Oops, nothing came through.');
       });
     }
     
