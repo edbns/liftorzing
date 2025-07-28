@@ -330,13 +330,18 @@
 
     #form-container {
       display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: auto;
       padding: 40px;
       max-width: 500px;
+      width: 90%;
       max-height: 90vh;
-      margin: 0 auto;
       font-family: 'JetBrains Mono', monospace;
       animation: zoomFadeIn 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-      position: relative;
       box-shadow: 0 15px 40px rgba(0,0,0,0.15);
       border-radius: 0px; /* Remove radius for sharp corners */
       transform-origin: center center;
@@ -345,6 +350,7 @@
       overflow-y: auto;
       scrollbar-width: thin; /* Firefox */
       scrollbar-color: #666 #333; /* Firefox */
+      text-align: center;
     }
     
     /* Webkit scrollbar styling */
@@ -364,13 +370,18 @@
     
     #message-container {
       display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: auto;
       padding: 40px;
       max-width: 500px;
+      width: 90%;
       max-height: 90vh;
-      margin: 0 auto;
       font-family: 'JetBrains Mono', monospace;
       animation: slideInRight 0.7s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-      position: relative;
       box-shadow: 0 15px 40px rgba(0,0,0,0.15);
       border-radius: 0px; /* Remove radius for sharp corners */
       background: linear-gradient(135deg, #000000 0%, #333333 100%);
@@ -378,6 +389,7 @@
       overflow-y: auto;
       scrollbar-width: thin; /* Firefox */
       scrollbar-color: #666 #333; /* Firefox */
+      text-align: center;
     }
     
     /* Webkit scrollbar styling */
@@ -421,6 +433,7 @@
       margin-top: 24px;
       font-weight: 500;
       font-family: 'JetBrains Mono', monospace;
+      text-align: center;
     }
 
     input, textarea, select {
@@ -433,6 +446,67 @@
       transition: border 0.3s;
       font-family: 'JetBrains Mono', monospace;
       background: #f9f9f9;
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+      background-color: #f9f9f9;
+    }
+
+    select:hover {
+      border-color: #666;
+      background-color: #f0f0f0;
+    }
+
+    select:hover option {
+      display: block;
+    }
+
+    /* Custom dropdown behavior */
+    .gender-select {
+      position: relative;
+    }
+
+    .gender-select:hover .dropdown-options {
+      display: block;
+    }
+
+    .dropdown-options {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      border-top: none;
+      z-index: 1000;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .dropdown-option {
+      padding: 10px 12px;
+      cursor: pointer;
+      background: white;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      color: #333;
+    }
+
+    .dropdown-option:hover {
+      background: #f0f0f0;
+    }
+
+    select:focus {
+      border-color: #333;
+      background-color: white;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
     }
 
     input:focus, textarea:focus, select:focus {
@@ -491,7 +565,7 @@
 
     .action-button:hover {
       background: #666;
-      box-shadow: 0 0 15px rgba(255,255,255,0.3);
+      box-shadow: 0 0 20px rgba(255,255,255,0.4);
       transform: translateY(-2px);
     }
     
@@ -504,6 +578,8 @@
     .action-button.lift:hover {
       background: #555555;
       border-color: #00ff00;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+      transform: translateY(-2px);
     }
     
     .action-button.zing {
@@ -515,6 +591,8 @@
     .action-button.zing:hover {
       background: #555555;
       border-color: #ff0000;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+      transform: translateY(-2px);
     }
 
     /* Photo upload styling */
@@ -541,7 +619,8 @@
     .photo-upload-label:hover {
       background: #444444;
       border-color: #999;
-      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+      box-shadow: 0 0 15px rgba(255,255,255,0.4);
+      transform: translateY(-1px);
     }
 
     #photo-upload {
@@ -556,6 +635,7 @@
     /* Input method toggle styling */
     .input-method-section {
       margin: 20px 0;
+      text-align: center;
     }
 
     .input-method-toggle {
@@ -580,13 +660,15 @@
     .method-btn:hover {
       background: #444444;
       border-color: #666;
+      box-shadow: 0 0 15px rgba(255,255,255,0.4);
+      transform: translateY(-1px);
     }
 
     .method-btn.active {
       background: #000;
       color: white;
       border-color: #666;
-      box-shadow: 0 0 10px rgba(255,255,255,0.3);
+      box-shadow: 0 0 15px rgba(255,255,255,0.5);
     }
 
     .input-section {
@@ -1263,7 +1345,7 @@
 
 
 
-  <div id="message-container" class="centered">
+  <div id="message-container">
     <button class="close-btn" onclick="closeMessage()">×</button>
     <h2 id="message-title" style="font-family: 'Orbitron', monospace; color: white; margin-bottom: 60px; display: flex; justify-content: center; align-items: center; text-transform: uppercase; letter-spacing: 2px;"></h2>
     <div id="message-content" style="font-family: 'JetBrains Mono', monospace; margin: 40px 0; line-height: 1.6; text-align: left; padding: 30px 20px; border-radius: 0px; background: rgba(0,0,0,0.05); position: relative; letter-spacing: 0.5px;"></div>
@@ -1435,20 +1517,29 @@
     <span id="cursor"></span>
   </div>
   
-  <div id="form-container" class="centered">
+  <div id="form-container">
     <button class="close-btn" onclick="closeForm()">×</button>
-    <h2 style="font-family: 'Orbitron', monospace; color: white; text-transform: uppercase; letter-spacing: 2px;">[ SYSTEM INTERFACE ]</h2>
-    <p style="max-width: 400px; margin: 10px auto; color: white; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px;">Initialize personality boost protocol...</p>
+    <h2 id="form-title" style="font-family: 'Orbitron', monospace; color: white; text-transform: uppercase; letter-spacing: 2px;">[ SYSTEM INTERFACE ]</h2>
+    <p id="form-description" style="max-width: 400px; margin: 10px auto; color: white; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px;">Initialize personality boost protocol...</p>
     <form id="mood-form" onsubmit="generateMessage(event)">
-      <label style="color: white;">Your Name:</label>
-      <input type="text" name="name" required>
-      <label style="color: white;">Gender (optional):</label>
-      <select name="gender" required>
-        <option value="">Select...</option>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-        <option value="prefer_not_to_say">Prefer not to say</option>
-      </select>
+      <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+        <div style="flex: 1;">
+          <label style="color: white;">Name:</label>
+          <input type="text" name="name" required>
+        </div>
+        <div style="flex: 1;">
+          <label style="color: white;">Gender (optional):</label>
+          <div class="gender-select">
+            <input type="text" id="gender-display" value="Prefer not to say" readonly style="width: 100%; padding: 12px; font-size: 1rem; margin-top: 6px; border-radius: 0px; border: 1px solid #ccc; transition: border 0.3s; font-family: 'JetBrains Mono', monospace; background: #f9f9f9; cursor: pointer;">
+            <input type="hidden" name="gender" value="prefer_not_to_say">
+            <div class="dropdown-options">
+              <div class="dropdown-option" data-value="prefer_not_to_say">Prefer not to say</div>
+              <div class="dropdown-option" data-value="male">Male</div>
+              <div class="dropdown-option" data-value="female">Female</div>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <!-- Input Method Choice -->
       <div class="input-method-section">
@@ -1466,7 +1557,7 @@
       <!-- Text Input Section -->
       <div id="text-input-section" class="input-section">
         <label style="color: white;">Describe your day or mood:</label>
-        <textarea name="keywords" id="keywords-textarea" rows="4" placeholder="Enter your current state..."></textarea>
+        <textarea name="keywords" id="keywords-textarea" rows="3" placeholder="Enter your current state..."></textarea>
       </div>
 
       <!-- Photo Input Section -->
@@ -1485,12 +1576,7 @@
           </div>
         </div>
       </div>
-      <div class="intensity-selector">
-        <label style="display: block; margin-bottom: 10px; font-size: 0.9rem; color: white;">Intensity Level:</label>
-        <button type="button" class="intensity-btn active" data-intensity="mild" onclick="setIntensity('mild')">Mild</button>
-        <button type="button" class="intensity-btn" data-intensity="medium" onclick="setIntensity('medium')">Medium</button>
-        <button type="button" class="intensity-btn" data-intensity="intense" onclick="setIntensity('intense')">Intense</button>
-      </div>
+
       <button type="submit" class="action-button" id="submit-btn">Generate Message</button>
       
       <!-- Spinner -->
@@ -1504,6 +1590,25 @@
         to { transform: rotate(360deg); }
       }
       </style>
+
+      <script>
+        // Custom dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+          const genderDisplay = document.getElementById('gender-display');
+          const genderHidden = document.querySelector('input[name="gender"]');
+          const dropdownOptions = document.querySelectorAll('.dropdown-option');
+
+          dropdownOptions.forEach(option => {
+            option.addEventListener('click', function() {
+              const value = this.getAttribute('data-value');
+              const text = this.textContent;
+              
+              genderDisplay.value = text;
+              genderHidden.value = value;
+            });
+          });
+        });
+      </script>
     </form>
   </div>
 
@@ -1632,7 +1737,7 @@
     const cursor = document.getElementById('cursor');
     const submitBtn = document.getElementById('submit-btn');
     let currentType = '';
-    let selectedIntensity = 'mild';
+    let selectedIntensity = 'intense'; // Default to intense for maximum impact
 
     // Input method switching
     let currentInputMethod = 'text';
@@ -1767,35 +1872,23 @@
     }
 
     function updateFormForType(type) {
+      const formTitle = document.getElementById('form-title');
+      const formDescription = document.getElementById('form-description');
+      
       if (type === 'positive') {
+        formTitle.textContent = '[ LIFT PROTOCOL ACTIVATED ]';
+        formDescription.textContent = 'Initialize confidence enhancement protocol and prepare for motivational boost...';
         submitBtn.textContent = 'UPLIFT MY DAY';
         submitBtn.className = 'action-button lift';
-        // Update intensity buttons for Lift (keep green)
-        updateIntensityButtons('lift');
       } else {
+        formTitle.textContent = '[ ZING MODE ENGAGED ]';
+        formDescription.textContent = 'Initialize humorous analysis protocol and prepare for witty evaluation...';
         submitBtn.textContent = 'ROAST AWAY';
         submitBtn.className = 'action-button zing';
-        // Update intensity buttons for Zing (use red)
-        updateIntensityButtons('zing');
       }
     }
 
-    function updateIntensityButtons(type) {
-      const intensityButtons = document.querySelectorAll('.intensity-btn');
-      intensityButtons.forEach(btn => {
-        if (type === 'zing') {
-          // Red styling for Zing
-          btn.style.setProperty('--active-border-color', '#ff0000');
-          btn.style.setProperty('--active-box-shadow', '0 0 10px rgba(255, 0, 0, 0.3)');
-          btn.style.setProperty('--checkmark-color', '#ff0000');
-        } else {
-          // Green styling for Lift (default)
-          btn.style.setProperty('--active-border-color', '#00ff00');
-          btn.style.setProperty('--active-box-shadow', '0 0 10px rgba(0, 255, 0, 0.3)');
-          btn.style.setProperty('--checkmark-color', '#00ff00');
-        }
-      });
-    }
+
 
     function closeForm() {
       // Add fade out animation before hiding
@@ -2086,20 +2179,14 @@
       };
     }
     
-    function setIntensity(intensity) {
-      selectedIntensity = intensity;
-      document.querySelectorAll('.intensity-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      document.querySelector(`[data-intensity="${intensity}"]`).classList.add('active');
-    }
+
     
     /* Particle functions removed */
     
     function copyMessage() {
       const title = messageTitle.textContent;
       const content = messageContent.textContent;
-      const fullText = `${title}\n\n${content}`;
+      const fullText = `${title}\n\n${content}\n\nGenerated by Lift or Zing`;
       
       navigator.clipboard.writeText(fullText).then(() => {
         const btn = document.querySelector('.share-btn.copy');
@@ -2399,7 +2486,7 @@
     
     function tryPlatformShare(platform) {
       const title = messageTitle.textContent;
-      const content = messageContent.textContent.substring(0, 400) + '...';
+      const content = messageContent.textContent;
       const text = encodeURIComponent(`${title}\n\n${content}\n\nGenerated by Lift or Zing`);
       
       switch(platform) {
@@ -2424,7 +2511,7 @@
     
     function fallbackTextShare(platform) {
       const title = messageTitle.textContent;
-      const content = messageContent.textContent.substring(0, 400) + '...';
+      const content = messageContent.textContent;
       const text = `${title}\n\n${content}\n\nGenerated by Lift or Zing`;
       
       navigator.clipboard.writeText(text).then(() => {
@@ -2434,7 +2521,7 @@
     
     function directShare(platform) {
       const title = messageTitle.textContent;
-      const content = messageContent.textContent.substring(0, 400) + '...';
+      const content = messageContent.textContent;
       const text = encodeURIComponent(`${title}\n\n${content}\n\nGenerated by Lift or Zing`);
       
       let shareUrl = '';
@@ -3662,8 +3749,9 @@
       
       conclusion = conclusions[intensity][Math.floor(Math.random() * conclusions[intensity].length)];
       
-      // Construct final message with enhanced formatting
-      const fullMessage = `${intro}\n\n${body}\n\n${conclusion}${personalityQuirk}${photoElement}`;
+      // Construct final message with enhanced formatting and hashtags
+      const hashtags = getHashtags(intensity, analysisResult);
+      const fullMessage = `${intro}\n\n${body}\n\n${conclusion}${personalityQuirk}${photoElement}\n\n${hashtags}`;
       messageContent.textContent = fullMessage;
       messageContent.style.background = 'linear-gradient(135deg, rgba(0, 255, 0, 0.05), rgba(0, 255, 0, 0.1))';
       messageContent.style.borderLeft = '4px solid #00ff00';
@@ -3673,6 +3761,50 @@
       messageContent.style.fontFamily = "'JetBrains Mono', monospace";
       messageContent.style.fontSize = '0.95em';
       messageContent.style.lineHeight = '1.8';
+    }
+    
+    function getHashtags(intensity, analysisResult) {
+      const baseHashtags = ['#LiftOrZing', '#Motivation', '#Vibes'];
+      const intensityHashtags = {
+        mild: ['#Gentle', '#Calm', '#Peaceful'],
+        medium: ['#Motivated', '#Inspired', '#Growing'],
+        intense: ['#Unstoppable', '#Fierce', '#Powerful']
+      };
+      
+      const themeHashtags = [];
+      if (analysisResult.stress > 0) themeHashtags.push('#StressRelief', '#SelfCare');
+      if (analysisResult.sadness > 0) themeHashtags.push('#Healing', '#Hope');
+      if (analysisResult.fatigue > 0) themeHashtags.push('#Rest', '#Recovery');
+      if (analysisResult.success > 0) themeHashtags.push('#Success', '#Achievement');
+      if (analysisResult.health > 0) themeHashtags.push('#Health', '#Wellness');
+      if (analysisResult.change > 0) themeHashtags.push('#Change', '#Growth');
+      if (analysisResult.creativity > 0) themeHashtags.push('#Creativity', '#Art');
+      if (analysisResult.relationship > 0) themeHashtags.push('#Relationships', '#Love');
+      
+      const allHashtags = [...baseHashtags, ...intensityHashtags[intensity], ...themeHashtags];
+      return allHashtags.slice(0, 5).join(' ');
+    }
+    
+    function getRoastHashtags(intensity, roastAnalysis) {
+      const baseHashtags = ['#LiftOrZing', '#Roast', '#Humor'];
+      const intensityHashtags = {
+        mild: ['#GentleRoast', '#SoftBurn', '#FriendlyFire'],
+        medium: ['#MediumRoast', '#Playful', '#Sassy'],
+        intense: ['#Savage', '#Fierce', '#Iconic']
+      };
+      
+      const themeHashtags = [];
+      if (roastAnalysis.work > 0) themeHashtags.push('#WorkLife', '#Career');
+      if (roastAnalysis.family > 0) themeHashtags.push('#Family', '#Drama');
+      if (roastAnalysis.dating > 0) themeHashtags.push('#Dating', '#Love');
+      if (roastAnalysis.money > 0) themeHashtags.push('#Money', '#Finance');
+      if (roastAnalysis.fitness > 0) themeHashtags.push('#Fitness', '#Gym');
+      if (roastAnalysis.social > 0) themeHashtags.push('#Social', '#Friends');
+      if (roastAnalysis.technology > 0) themeHashtags.push('#Tech', '#Digital');
+      if (roastAnalysis.food > 0) themeHashtags.push('#Food', '#Cooking');
+      
+      const allHashtags = [...baseHashtags, ...intensityHashtags[intensity], ...themeHashtags];
+      return allHashtags.slice(0, 5).join(' ');
     }
     
     function generateFunnyMessage(name, gender, keywords, intensity, photoFile = null) {
@@ -3770,8 +3902,9 @@
       conclusion = roastConclusions[intensity][Math.floor(Math.random() * roastConclusions[intensity].length)];
         `Remember, if you can laugh at yourself, you'll never run out of entertainment!`;
       
-      // Construct final message with enhanced formatting
-      const fullMessage = `${intro}\n\n${body}\n\n${conclusion}${roastPersonality}${photoRoast}`;
+      // Construct final message with enhanced formatting and hashtags
+      const hashtags = getRoastHashtags(intensity, roastAnalysis);
+      const fullMessage = `${intro}\n\n${body}\n\n${conclusion}${roastPersonality}${photoRoast}\n\n${hashtags}`;
       messageContent.textContent = fullMessage;
       messageContent.style.background = 'linear-gradient(135deg, rgba(255, 0, 0, 0.05), rgba(255, 0, 0, 0.1))';
       messageContent.style.borderLeft = '4px solid #ff0000';

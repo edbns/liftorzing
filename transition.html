@@ -88,29 +88,32 @@
     }
 
     #terminal-output {
-      color: #00ff00;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1.1rem;
+      color: #ffffff;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 500;
       padding: 2rem;
       text-align: left;
       white-space: pre-wrap;
-      max-width: 80%;
+      max-width: 90%;
+      min-height: 60vh;
       margin: 0;
       animation: screenFlicker 4s infinite, textScanlines 1.5s linear infinite, textGlitch 0.5s infinite;
-      background-image: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.05) 50%);
+      background-image: linear-gradient(transparent 50%, rgba(255, 255, 255, 0.05) 50%);
       background-size: 100% 3px;
       position: relative;
       z-index: 5;
       align-self: flex-start;
-      text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+      text-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
       transform-origin: left top;
+      overflow: visible;
     }
 
     /* Typing cursor effect */
     #terminal-output::after {
       content: "█";
       animation: blink 1s steps(2) infinite;
-      color: #00ff00;
+      color: #ffffff;
       vertical-align: middle;
     }
 
@@ -123,7 +126,7 @@
       0%, 91%, 100% { transform: translate(0); filter: brightness(1); }
       92% { transform: translate(-2px, 1px); filter: brightness(1.2); }
       93% { transform: translate(0); filter: brightness(1); }
-      94% { transform: translate(1px, -1px); filter: brightness(1.3); text-shadow: 0 0 8px rgba(0, 255, 0, 0.9); }
+      94% { transform: translate(1px, -1px); filter: brightness(1.3); text-shadow: 0 0 8px rgba(255, 255, 255, 0.9); }
       95% { transform: translate(0); filter: brightness(1); }
     }
 
@@ -141,6 +144,26 @@
       z-index: 1000;
       opacity: 0;
       transition: opacity 0.5s ease;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      #terminal-output {
+        font-size: 1rem;
+        padding: 1rem;
+        max-width: 95%;
+        min-height: 50vh;
+      }
+      
+      #surprise-message {
+        font-size: 1.8rem;
+        padding: 1rem;
+      }
+      
+      #transition-container {
+        padding-top: 5vh;
+        padding-left: 2vw;
+      }
     }
   </style>
 </head>
@@ -162,55 +185,49 @@
     // Terminal animation sequence data
     const liftSequences = [
       [
-        "[Uplift protocol engaged...]",
-        "[Detecting low vibes...]",
-        "[Calibrating compliments]",
-        "[Targeting confidence zones]",
-        "[Deploying positive message]",
-        "[Opening the LIFT door...]"
+        "🚀 [CONFIDENCE ENHANCEMENT PROTOCOL ENGAGED]",
+        "✨ [SCANNING FOR VIBE BOOST OPPORTUNITIES]",
+        "💪 [DEPLOYING POSITIVE AFFIRMATIONS]",
+        "🌟 [UNLOCKING INNER CHAMPION MODE]",
+        "🏆 [LIFT DOOR ACCESS GRANTED] #BoostedVibes"
       ],
       [
-        "[Manifesting motivation...]",
-        "[Delivering daily encouragement]",
-        "[Scanning for inner peace]",
-        "[Boost fuel loaded]",
-        "[Mood upgrade initiated]",
-        "[Positivity unlocked]"
+        "💫 [MOTIVATION MANIFESTATION INITIATED]",
+        "🎯 [TARGETING CONFIDENCE ZONES]",
+        "🌈 [ASSEMBLING JOY PACKET]",
+        "⭐ [POSITIVITY UNLOCKED]",
+        "🔥 [CHAMPION MODE ACTIVATED] #Unstoppable"
       ],
       [
-        "[Setting tone to hopeful]",
-        "[Charging confidence cells]",
-        "[Assembling joy packet]",
-        "[Unlocking affirmations]",
-        "[Delivering LIFT...]",
-        "[Champion mode activated]"
+        "⚡ [VIBE BOOST ENGINE ONLINE]",
+        "💎 [CALIBRATING COMPLIMENTS]",
+        "🌞 [DEPLOYING DAILY ENCOURAGEMENT]",
+        "🌿 [INNER PEACE SCAN COMPLETE]",
+        "🎉 [LIFT PROTOCOL SUCCESSFUL] #Motivation"
       ]
     ];
 
     const zingSequences = [
       [
-        "[Booting sass engine...]",
-        "[Entered Zing Chamber]",
-        "[Vibe Scan: chaotic, overconfident]",
-        "[Crafting roast...]",
-        "[Spicy filter engaged]",
-        "[Launching verbal missile...]"
+        "😈 [SASS ENGINE BOOTING UP]",
+        "🎪 [ENTERED ZING CHAMBER]",
+        "🔍 [VIBE SCAN: CHAOTIC, OVERCONFIDENT]",
+        "🌶️ [CRAFTING SPICY ROAST]",
+        "💥 [VERBAL MISSILE LAUNCHED] #RoastMaster"
       ],
       [
-        "[Scanning for insecurity]",
-        "[Sarcasm mode: Overdrive]",
-        "[Mood: flaming]",
-        "[Targeting ego zones]",
-        "[Engaging roast cannon]",
-        "[Mic check... dropping truth]"
+        "🤡 [SARCASM MODE: OVERDRIVE]",
+        "🎭 [SCANNING FOR INSECURITY]",
+        "🎯 [TARGETING EGO ZONES]",
+        "🔥 [ENGAGING ROAST CANNON]",
+        "💣 [TRUTH BOMB DEPLOYED] #Savage"
       ],
       [
-        "[Zing mode initiated]",
-        "[Reading emotional radar]",
-        "[Found: Self-esteem]",
-        "[Smashing it politely...]",
-        "[Calibrating humor]",
-        "[Deploying dramatic roast]"
+        "🎪 [ZING MODE INITIATED]",
+        "📡 [READING EMOTIONAL RADAR]",
+        "🎯 [FOUND: SELF-ESTEEM]",
+        "🎨 [CALIBRATING HUMOR]",
+        "🎬 [DRAMATIC ROAST DEPLOYED] #Iconic"
       ]
     ];
 
@@ -221,36 +238,27 @@
     // Hide terminal output initially
     output.style.display = "none";
     
-    // Configure surprise message based on mode
-    if (mode === "lift") {
-      surpriseMessage.innerHTML = "✨ Incoming: ego boost protocol activated.";
-      surpriseMessage.style.color = "#00FFAA";
-      surpriseMessage.style.textShadow = "0 0 10px rgba(0, 255, 170, 0.7)";
-    } else {
-      surpriseMessage.innerHTML = "🔥 System diagnosis: you need a good roast.";
-      surpriseMessage.style.color = "#FF5A5F";
-      surpriseMessage.style.textShadow = "0 0 10px rgba(255, 90, 95, 0.7)";
-    }
-    
-    // Show the surprise message
-    setTimeout(() => {
-      surpriseMessage.style.opacity = "1";
-      
-      // Hide the message and continue with the terminal animation after 2.5 seconds
-      setTimeout(() => {
-        surpriseMessage.style.opacity = "0";
-        setTimeout(() => {
-          surpriseMessage.style.display = "none";
-          output.style.display = "block";
-          startTerminalAnimation();
-        }, 500);
-      }, 2500);
-    }, 100);
+    // Hide surprise message and show terminal immediately
+    surpriseMessage.style.display = "none";
+    output.style.display = "block";
+    startTerminalAnimation();
     
     // Terminal animation functions
     function startTerminalAnimation() {
       const sequences = mode === "lift" ? liftSequences : zingSequences;
       const chosenSet = sequences[Math.floor(Math.random() * sequences.length)];
+      
+      // Apply color based on mode
+      if (mode === "lift") {
+        output.style.color = "#00ff00"; // Green for lift
+        output.style.textShadow = "0 0 3px rgba(0, 255, 0, 0.5)";
+      } else {
+        output.style.color = "#ff0000"; // Red for zing
+        output.style.textShadow = "0 0 3px rgba(255, 0, 0, 0.5)";
+      }
+      
+      // Apply Orbitron font to terminal output
+      output.style.fontFamily = "'Orbitron', monospace";
       
       // Letter-by-letter typewriter variables
       let currentLineIndex = 0;
@@ -293,11 +301,21 @@
     function applyGlitchEffect() {
       // Create a glitch effect by temporarily distorting the text
       output.style.transform = 'translate(-2px, 1px) skew(1deg)';
-      output.style.textShadow = '0 0 10px rgba(0, 255, 0, 0.9), -2px 0 rgba(255, 0, 0, 0.5), 2px 0 rgba(0, 0, 255, 0.5)';
+      
+      // Apply glitch color based on mode
+      if (mode === "lift") {
+        output.style.textShadow = '0 0 10px rgba(0, 255, 0, 0.9), -2px 0 rgba(255, 0, 0, 0.5), 2px 0 rgba(0, 0, 255, 0.5)';
+      } else {
+        output.style.textShadow = '0 0 10px rgba(255, 0, 0, 0.9), -2px 0 rgba(0, 255, 0, 0.5), 2px 0 rgba(0, 0, 255, 0.5)';
+      }
       
       setTimeout(function() {
         output.style.transform = 'translate(0)';
-        output.style.textShadow = '0 0 5px rgba(0, 255, 0, 0.7)';
+        if (mode === "lift") {
+          output.style.textShadow = '0 0 5px rgba(0, 255, 0, 0.7)';
+        } else {
+          output.style.textShadow = '0 0 5px rgba(255, 0, 0, 0.7)';
+        }
         
         // Schedule another random glitch after a random delay
         if (Math.random() < 0.7) { // 70% chance to have another glitch
@@ -310,15 +328,28 @@
     // Final glitch and redirect function
     function finalGlitchAndRedirect() {
       output.style.transform = 'translate(-5px, 3px) skew(-3deg)';
-      output.style.textShadow = '0 0 15px rgba(0, 255, 0, 1), -3px 0 rgba(255, 0, 0, 0.7), 3px 0 rgba(0, 0, 255, 0.7)';
+      
+      if (mode === "lift") {
+        output.style.textShadow = '0 0 15px rgba(0, 255, 0, 1), -3px 0 rgba(255, 0, 0, 0.7), 3px 0 rgba(0, 0, 255, 0.7)';
+      } else {
+        output.style.textShadow = '0 0 15px rgba(255, 0, 0, 1), -3px 0 rgba(0, 255, 0, 0.7), 3px 0 rgba(0, 0, 255, 0.7)';
+      }
       
       setTimeout(function() {
         output.style.transform = 'translate(3px, -2px) skew(2deg)';
-        output.style.textShadow = '0 0 8px rgba(0, 255, 0, 0.8)';
+        if (mode === "lift") {
+          output.style.textShadow = '0 0 8px rgba(0, 255, 0, 0.8)';
+        } else {
+          output.style.textShadow = '0 0 8px rgba(255, 0, 0, 0.8)';
+        }
         
         setTimeout(function() {
           output.style.transform = 'translate(0)';
-          output.style.textShadow = '0 0 5px rgba(0, 255, 0, 0.7)';
+          if (mode === "lift") {
+            output.style.textShadow = '0 0 5px rgba(0, 255, 0, 0.7)';
+          } else {
+            output.style.textShadow = '0 0 5px rgba(255, 0, 0, 0.7)';
+          }
           
           // After animation completes, redirect to form page with the randomly chosen mode
           setTimeout(function() {
