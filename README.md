@@ -1,4 +1,4 @@
-# LiftorZing Netlify Deployment 🔥🔥🔥
+# LiftorZing 🔥🔥🔥 Netlify Deployment 
 
 This project is configured for deployment on Netlify with serverless functions support.
 
